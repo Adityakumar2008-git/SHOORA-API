@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation | SHOORA AI API</title>
+    <link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
+</head>
+<body class="v10-layout">
+    <nav class="site-nav">
+        <div class="container nav-wrap">
+            <a href="index.html" class="nav-logo brand">
+                <i class="fas fa-microchip"></i>
+                <span>SHOORA AI</span>
+            </a>
+            <div class="nav-links">
+                <a href="pricing.html">Pricing</a>
+                <a href="curriculum.html" class="active">Docs</a>
+                <a href="support.html">Support</a>
+                <a href="register.html" class="nav-cta">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="docs-hero section-v10">
+        <div class="container">
+            <div class="reveal-item">
+                <span class="badge-v10">API Documentation</span>
+                <h1>Developer Docs</h1>
+                <p>Extensive documentation for our endpoints, from standard completions to agentic workflows.</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="section-v10" style="padding-top: 0;">
+        <div class="container">
+            <div class="api-docs-grid">
+                
+                <!-- Sidebar -->
+                <aside class="docs-sidebar">
+                    <ul>
+                        <li><a href="#authentication"><i class="fa-solid fa-key"></i> Authentication</a></li>
+                        <li><a href="#rate-limits"><i class="fa-solid fa-gauge-high"></i> Rate Limits</a></li>
+                        <li><a href="#endpoints"><i class="fa-solid fa-server"></i> Endpoints</a>
+                            <ul class="submenu">
+                                <li><a href="#chat-completions">Chat Completions</a></li>
+                                <li><a href="#embeddings">Embeddings</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#errors"><i class="fa-solid fa-triangle-exclamation"></i> Errors</a></li>
+                    </ul>
+                </aside>
+
+                <!-- Content -->
+                <div class="docs-content">
+                    
+                    <!-- Authentication -->
+                    <div id="authentication" class="docs-section reveal-item">
+                        <h2>Authentication</h2>
+                        <p>The SHOORA AI API uses API keys for authentication. Visit your <a href="register.html">dashboard</a> to retrieve the API key you'll use in your requests.</p>
+                        <p>Remember that your API key is a secret! Do not share it with others or expose it in any client-side code (browsers, apps).</p>
+                        
+                        <div class="terminal-v10">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <span></span><span></span><span></span>
+                                </div>
+                                <span class="lang-label">bash</span>
+                            </div>
+                            <div class="terminal-body">
+                                <span class="keyword">curl</span> https://api.shooraai.com/v1/models \<br>
+                                &nbsp;&nbsp;-H <span class="string">"Authorization: Bearer $SHOORA_API_KEY"</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rate Limits -->
+                    <div id="rate-limits" class="docs-section reveal-item">
+                        <h2>Rate Limits</h2>
+                        <p>To ensure platform stability, we enforce rate limits at the organizational and user levels. The limits depend on your current <a href="pricing.html">pricing tier</a>.</p>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tier</th>
+                                        <th>Requests per Minute (RPM)</th>
+                                        <th>Tokens per Minute (TPM)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="tier-name">Developer</td>
+                                        <td>500</td>
+                                        <td>100,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tier-name">Startup</td>
+                                        <td>5,000</td>
+                                        <td>2,000,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tier-name">Enterprise</td>
+                                        <td>Custom</td>
+                                        <td>Custom</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Endpoints -->
+                    <div id="endpoints" class="docs-section reveal-item">
+                        <h2>Endpoints</h2>
+                        
+                        <!-- Chat Completions -->
+                        <div id="chat-completions" class="endpoint-block">
+                            <h3 class="endpoint-title">
+                                <span class="method">POST</span> 
+                                /v1/chat/completions
+                            </h3>
+                            <p>Creates a model response for the given chat conversation.</p>
+                            
+                            <div class="terminal-v10">
+                                <div class="terminal-header">
+                                    <div class="terminal-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span class="lang-label">Request Example</span>
+                                </div>
+                                <div class="terminal-body">
+                                    <span class="keyword">curl</span> https://api.shooraai.com/v1/chat/completions \<br>
+                                    &nbsp;&nbsp;-H <span class="string">"Content-Type: application/json"</span> \<br>
+                                    &nbsp;&nbsp;-H <span class="string">"Authorization: Bearer $SHOORA_API_KEY"</span> \<br>
+                                    &nbsp;&nbsp;-d <span class="string">'{<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"model": "shoora-turbo-v2",<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;"messages": [<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"role": "system", "content": "You are a helpful assistant."},<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"role": "user", "content": "Hello!"}<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;]<br>
+                                    &nbsp;&nbsp;}'</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-v10">
+        <div class="container footer-grid">
+            <div class="footer-col" style="grid-column: span 1;">
+                <div class="brand">SHOORA AI</div>
+                <p>© 2026 SHOORA AI API Platform.<br>Built for modern developers.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="curriculum.html">Documentation</a>
+                <a href="register.html">Get API Key</a>
+                <a href="pricing.html">Pricing</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="support.html">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

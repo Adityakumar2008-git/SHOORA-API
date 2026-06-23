@@ -1,0 +1,193 @@
+/* 
+  GenAI Portal V7 - Industry Grade Mobile First Architecture
+  Strictly Isolated: Mobile (Base) vs Desktop (min-width: 1024px)
+*/
+
+:root {
+    --primary: #1a73e8;
+    --primary-soft: rgba(26, 115, 232, 0.1);
+    --primary-hover: #1557b0;
+    --background: #ffffff;
+    --surface-alt: #f8f9fa;
+    --surface-glass: rgba(255, 255, 255, 0.95);
+    --text-primary: #1d1d1f; /* Apple Style Near-Black */
+    --text-accent: #174ea6;
+    --text-secondary: #424245;
+    --text-muted: #86868b;
+    --border: #d2d2d7;
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-deep: 0 20px 48px rgba(0, 0, 0, 0.1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    background-color: var(--background);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .brand { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
+
+/* ============================================================
+   MOBILE BASE UI (Scratch Designed for 0px - 1023px)
+   ============================================================ */
+
+.container { width: 100%; padding: 0 24px; }
+.section-v6 { padding: 80px 0; }
+.bg-alt { background-color: var(--surface-alt); }
+.bg-dark-text { background-color: #000; color: #fff; }
+.center-text { text-align: center; }
+
+/* Mobile Navigation - Immersive Drawer */
+.site-nav {
+    position: sticky; top: 0;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.nav-wrap { display: flex; justify-content: space-between; align-items: center; }
+.brand a { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+
+.nav-links {
+    position: fixed; top: 0; right: -100%;
+    width: 100%; height: 100vh;
+    background: #fff;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    transition: 0.5s cubic-bezier(0.8, 0, 0.2, 1);
+    z-index: 1050;
+    display: flex;
+}
+.nav-links.active { right: 0; }
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 2rem;
+    margin: 15px 0;
+    font-family: 'Outfit', sans-serif;
+}
+.nav-links a.btn-primary-sm { font-size: 1.5rem; padding: 16px 40px; margin-top: 20px; }
+
+/* Hamburger Menu Toggle */
+.nav-toggle { display: block; cursor: pointer; z-index: 1100; position: relative; width: 30px; height: 20px; }
+.nav-toggle span {
+    display: block; position: absolute; height: 2.5px; width: 100%;
+    background: var(--text-primary); border-radius: 10px; opacity: 1; left: 0;
+    transform: rotate(0deg); transition: .25s ease-in-out;
+}
+.nav-toggle span:nth-child(1) { top: 0px; }
+.nav-toggle span:nth-child(2) { top: 10px; }
+.nav-toggle span:nth-child(3) { top: 20px; }
+
+/* Mobile Hero - Vertical Narrative */
+.home-hero { padding: 60px 0 100px; text-align: center; }
+.home-hero .badge { color: var(--primary); font-weight: 700; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 20px; }
+.home-hero h1 { font-size: 3.5rem; line-height: 1; margin-bottom: 24px; color: #111; }
+.home-hero p { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 40px; max-width: 90%; margin-left: auto; margin-right: auto; }
+.home-cta { display: flex; flex-direction: column; gap: 16px; }
+
+.hero-bg-visual { margin-top: 60px; width: 110%; margin-left: -5%; pointer-events: none; }
+.hero-img-v6 { width: 100%; border-radius: 24px; box-shadow: var(--shadow-deep); }
+
+/* Mobile Cards - Native App Feel */
+.grid-3, .content-grid-2 { display: flex; flex-direction: column; gap: 24px; }
+
+.stat-card { background: #fff; padding: 40px; border-radius: 32px; box-shadow: var(--shadow-soft); border: 1px solid #f2f2f7; }
+.stat-card h2 { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
+
+.faculty-card { background: #111; padding: 32px; border-radius: 32px; text-align: center; }
+.faculty-avatar { width: 100px; height: 100px; background: #222; border-radius: 50%; margin: 0 auto 24px; }
+
+.curriculum-module {
+    background: #fff; border-radius: 32px; border: 1px solid #f2f2f7;
+    padding: 32px; box-shadow: var(--shadow-soft);
+}
+.module-num { font-size: 3.5rem; line-height: 1; margin-bottom: 20px; color: var(--primary-soft); }
+.module-details { display: flex; flex-direction: column; gap: 32px; }
+
+/* Mobile Wizard - Isolated Experience */
+.wizard-v4 {
+    background: #fff; padding: 40px 24px; border-radius: 32px;
+    box-shadow: var(--shadow-deep); width: 100%;
+}
+.input-row-v4 { display: flex; flex-direction: column; gap: 24px; }
+.actions-v4 { display: flex; flex-direction: column-reverse; gap: 20px; width: 100%; margin-top: 40px; }
+.btn-primary { 
+    display: block; width: 100%; padding: 20px; 
+    background: var(--primary); color: #fff; border-radius: 16px;
+    font-weight: 700; text-decoration: none; text-align: center; font-size: 1.1rem;
+    box-shadow: 0 10px 20px rgba(26, 115, 232, 0.2);
+}
+.btn-ghost { font-weight: 600; color: var(--text-muted); padding: 10px; }
+
+.input-v4 {
+    width: 100%; padding: 16px; border: 2px solid #f2f2f7;
+    border-radius: 16px; font-size: 1.05rem; background: #fbfbfd;
+}
+
+/* Footer - Mobile Vertical */
+.footer-v6 { padding: 60px 0; border-top: 1px solid #f2f2f7; text-align: center; }
+.footer-wrap { display: flex; flex-direction: column; gap: 40px; }
+
+/* ============================================================
+   DESKTOP VERSION (Untouched Elite Design 1024px+)
+   ============================================================ */
+
+@media (min-width: 1024px) {
+    .section-v6 { padding: 120px 0; }
+    .nav-toggle { display: none; }
+    .nav-links {
+        position: static; flex-direction: row; height: auto; width: auto;
+        padding: 0; background: transparent; box-shadow: none; right: 0;
+    }
+    .nav-links a { margin: 0 0 0 32px; font-size: 0.95rem; font-weight: 500; font-family: 'Inter', sans-serif; }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-links a.btn-primary-sm { font-size: 0.95rem; padding: 10px 24px; margin-top: 0; }
+
+    /* Desktop Hero */
+    .home-hero { height: 90vh; text-align: left; display: flex; align-items: center; padding: 0; }
+    .home-hero h1 { font-size: 5.5rem; }
+    .home-hero p { font-size: 1.4rem; max-width: 100%; margin: 0 0 40px 0; }
+    .home-cta { flex-direction: row; }
+    .btn-primary { width: auto; }
+
+    .glass-container {
+        background: var(--surface-glass);
+        backdrop-filter: blur(20px);
+        padding: 60px;
+        border-radius: 32px;
+        box-shadow: var(--shadow-soft);
+        max-width: 700px;
+    }
+    .hero-bg-visual { display: block; position: absolute; right: -5%; top: 50%; transform: translateY(-50%); width: 50%; z-index: -1; margin-top: 0; }
+
+    /* Desktop Grids */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    .content-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+
+    /* Desktop Curriculum Module */
+    .curriculum-module { flex-direction: row; gap: 60px; padding: 48px; }
+    .module-meta { flex: 0 0 250px; }
+    .module-details { flex-direction: row; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+
+    /* Desktop Wizard */
+    .wizard-v4 { padding: 60px; max-width: 680px; }
+    .input-row-v4 { flex-direction: row; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .actions-v4 { flex-direction: row; }
+    
+    .footer-wrap { flex-direction: row; justify-content: space-between; text-align: left; }
+}
+
+/* Animations (Global) */
+.reveal-item { opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.reveal-item.active { opacity: 1; transform: translateY(0); }

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Pricing | SHOORA AI API Platform</title>
+    <link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .api-tabs { display: flex; gap: 12px; margin: 48px 0 40px; flex-wrap: wrap; justify-content: center; }
+        .api-tab { padding: 10px 24px; border-radius: 40px; border: 1.5px solid var(--border, #e0e0e0); background: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.3s; letter-spacing: 0.5px; }
+        .api-tab.active, .api-tab:hover { background: #000; color: #fff; border-color: #000; }
+        .api-category { display: none; }
+        .api-category.active { display: block; }
+        .cat-header { text-align: center; margin-bottom: 48px; }
+        .cat-header .cat-icon { font-size: 3rem; margin-bottom: 16px; }
+        .cat-header h2 { font-size: 2.8rem; font-weight: 400; letter-spacing: -0.04em; }
+        .cat-header p { color: #666; margin-top: 12px; font-size: 1.1rem; }
+        .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        @media (max-width: 1023px) { .plans-grid { grid-template-columns: 1fr; } }
+        .plan-card { background: #fff; border: 1.5px solid #eee; border-radius: 20px; padding: 40px; position: relative; transition: 0.3s; }
+        .plan-card:hover { border-color: #1a73e8; box-shadow: 0 20px 60px rgba(26,115,232,0.08); transform: translateY(-4px); }
+        .plan-card.featured { border: 2px solid #1a73e8; }
+        .plan-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: #1a73e8; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; letter-spacing: 1.5px; }
+        .plan-name { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+        .plan-price { font-size: 3.2rem; font-weight: 700; letter-spacing: -2px; margin: 16px 0 4px; }
+        .plan-price span { font-size: 1rem; font-weight: 400; color: #888; letter-spacing: 0; }
+        .plan-desc { color: #888; font-size: 0.9rem; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid #f0f0f5; }
+        .plan-features { list-style: none; padding: 0; margin: 0 0 32px; }
+        .plan-features li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; color: #444; font-size: 0.95rem; }
+        .plan-features li i { color: #1a73e8; margin-top: 3px; flex-shrink: 0; }
+        .plan-btn { display: block; text-align: center; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: 0.3s; }
+        .plan-btn-primary { background: #000; color: #fff; }
+        .plan-btn-primary:hover { background: #1a73e8; }
+        .plan-btn-secondary { background: #f5f5f7; color: #000; }
+        .plan-btn-secondary:hover { background: #e5e5ea; }
+        .section-divider { text-align: center; padding: 80px 0 0; }
+        .section-divider h2 { font-size: 3rem; font-weight: 400; letter-spacing: -0.04em; }
+        .compare-note { text-align: center; margin-top: 60px; padding: 24px; background: #f8f8fb; border-radius: 12px; color: #666; font-size: 0.95rem; }
+        .compare-note a { color: #1a73e8; font-weight: 600; text-decoration: none; }
+    </style>
+</head>
+<body class="v10-layout">
+    <nav class="site-nav">
+        <div class="container nav-wrap">
+            <div class="brand"><a href="index.html">SHOORA AI</a></div>
+            <div class="nav-links">
+                <a href="use-cases.html">Use Cases</a>
+                <a href="pricing.html" style="color: var(--primary);">Pricing</a>
+                <a href="curriculum.html">Docs</a>
+                <a href="status.html">Status</a>
+                <a href="register.html" class="nav-cta">Get API Key</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="pricing-hero about-hero">
+        <div class="container">
+            <div class="hero-content reveal-item">
+                <span class="badge-v10">Transparent Pricing</span>
+                <h1>Simple, Scalable<br>API Pricing.</h1>
+                <p>Choose the API category that fits your project. Pay only for what you use. No hidden fees.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-v10 pricing-section">
+        <div class="container">
+
+            <!-- Category Tabs -->
+            <div class="api-tabs">
+                <button class="api-tab active" onclick="showCategory('language')"><i class="fas fa-brain"></i>Language AI</button>
+                <button class="api-tab" onclick="showCategory('vision')"><i class="fas fa-eye"></i>Vision AI</button>
+                <button class="api-tab" onclick="showCategory('code')"><i class="fas fa-code"></i>Code Gen</button>
+                <button class="api-tab" onclick="showCategory('speech')"><i class="fas fa-microphone"></i>Speech AI</button>
+                <button class="api-tab" onclick="showCategory('embed')"><i class="fas fa-vector-square"></i>Embeddings</button>
+            </div>
+
+            <!-- Language AI -->
+            <div class="api-category active" id="cat-language">
+                <div class="cat-header reveal-item">
+                    <div class="cat-icon">🧠</div>
+                    <h2>Language AI API</h2>
+                    <p>Powerful text generation, summarization, Q&A, and chat completion models.</p>
+                </div>
+                <div class="plans-grid">
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Starter</div>
+                        <div class="plan-price">Free<span>/mo</span></div>
+                        <div class="plan-desc">Perfect for prototyping and exploration.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>1,000 API calls/month</li>
+                            <li><i class="fas fa-check"></i>shoora-lite-v1 model</li>
+                            <li><i class="fas fa-check"></i>4,096 token context</li>
+                            <li><i class="fas fa-check"></i>Community support</li>
+                            <li><i class="fas fa-check"></i>REST API access</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                    </div>
+                    <div class="plan-card featured reveal-item">
+                        <div class="plan-name">Growth</div>
+                        <div class="plan-price">₹499<span>/mo</span></div>
+                        <div class="plan-desc">For growing apps that need reliable performance.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>500,000 API calls/month</li>
+                            <li><i class="fas fa-check"></i>shoora-turbo-v2 model</li>
+                            <li><i class="fas fa-check"></i>32,768 token context</li>
+                            <li><i class="fas fa-check"></i>Priority email support</li>
+                            <li><i class="fas fa-check"></i>Streaming responses</li>
+                            <li><i class="fas fa-check"></i>Function calling</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
+                    </div>
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-desc">Dedicated capacity with SLA guarantees.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>Unlimited API calls</li>
+                            <li><i class="fas fa-check"></i>shoora-ultra model access</li>
+                            <li><i class="fas fa-check"></i>128K token context</li>
+                            <li><i class="fas fa-check"></i>24/7 dedicated support</li>
+                            <li><i class="fas fa-check"></i>Custom fine-tuning</li>
+                            <li><i class="fas fa-check"></i>99.99% SLA uptime</li>
+                        </ul>
+                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vision AI -->
+            <div class="api-category" id="cat-vision">
+                <div class="cat-header reveal-item">
+                    <div class="cat-icon">👁️</div>
+                    <h2>Vision AI API</h2>
+                    <p>Image understanding, object detection, OCR, and visual Q&A at scale.</p>
+                </div>
+                <div class="plans-grid">
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Starter</div>
+                        <div class="plan-price">Free<span>/mo</span></div>
+                        <div class="plan-desc">Try vision capabilities at no cost.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>500 image requests/month</li>
+                            <li><i class="fas fa-check"></i>Basic object detection</li>
+                            <li><i class="fas fa-check"></i>Image classification</li>
+                            <li><i class="fas fa-check"></i>5MB max image size</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                    </div>
+                    <div class="plan-card featured reveal-item">
+                        <div class="plan-name">Pro Vision</div>
+                        <div class="plan-price">₹799<span>/mo</span></div>
+                        <div class="plan-desc">Advanced vision tasks for production apps.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>100,000 image requests/month</li>
+                            <li><i class="fas fa-check"></i>OCR & document parsing</li>
+                            <li><i class="fas fa-check"></i>Visual Q&A (VQA)</li>
+                            <li><i class="fas fa-check"></i>20MB max image size</li>
+                            <li><i class="fas fa-check"></i>Batch image processing</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
+                    </div>
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-desc">High-throughput vision pipelines.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>Unlimited requests</li>
+                            <li><i class="fas fa-check"></i>Video frame analysis</li>
+                            <li><i class="fas fa-check"></i>Custom model training</li>
+                            <li><i class="fas fa-check"></i>On-premise deployment</li>
+                        </ul>
+                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Gen -->
+            <div class="api-category" id="cat-code">
+                <div class="cat-header reveal-item">
+                    <div class="cat-icon">💻</div>
+                    <h2>Code Generation API</h2>
+                    <p>AI-powered code completion, review, documentation, and debugging.</p>
+                </div>
+                <div class="plans-grid">
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Dev</div>
+                        <div class="plan-price">Free<span>/mo</span></div>
+                        <div class="plan-desc">Ideal for individual developers.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>2,000 completions/month</li>
+                            <li><i class="fas fa-check"></i>15+ programming languages</li>
+                            <li><i class="fas fa-check"></i>2,048 token context</li>
+                            <li><i class="fas fa-check"></i>Code explanation</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                    </div>
+                    <div class="plan-card featured reveal-item">
+                        <div class="plan-name">Team</div>
+                        <div class="plan-price">₹999<span>/mo</span></div>
+                        <div class="plan-desc">For engineering teams shipping fast.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>1,000,000 tokens/month</li>
+                            <li><i class="fas fa-check"></i>50+ programming languages</li>
+                            <li><i class="fas fa-check"></i>16K token context</li>
+                            <li><i class="fas fa-check"></i>Code review & refactoring</li>
+                            <li><i class="fas fa-check"></i>Auto-documentation</li>
+                            <li><i class="fas fa-check"></i>IDE plugin support</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
+                    </div>
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-desc">For large engineering orgs.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>Unlimited tokens</li>
+                            <li><i class="fas fa-check"></i>Private codebase training</li>
+                            <li><i class="fas fa-check"></i>Security audit logs</li>
+                            <li><i class="fas fa-check"></i>SOC2 compliance</li>
+                        </ul>
+                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speech AI -->
+            <div class="api-category" id="cat-speech">
+                <div class="cat-header reveal-item">
+                    <div class="cat-icon">🎙️</div>
+                    <h2>Speech AI API</h2>
+                    <p>Speech-to-text transcription and text-to-speech synthesis in 30+ languages.</p>
+                </div>
+                <div class="plans-grid">
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Basic</div>
+                        <div class="plan-price">Free<span>/mo</span></div>
+                        <div class="plan-desc">Test voice features in your app.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>60 min transcription/month</li>
+                            <li><i class="fas fa-check"></i>10 languages</li>
+                            <li><i class="fas fa-check"></i>Standard audio quality</li>
+                            <li><i class="fas fa-check"></i>MP3/WAV support</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                    </div>
+                    <div class="plan-card featured reveal-item">
+                        <div class="plan-name">Pro</div>
+                        <div class="plan-price">₹649<span>/mo</span></div>
+                        <div class="plan-desc">Production-grade voice for your platform.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>5,000 min transcription/month</li>
+                            <li><i class="fas fa-check"></i>30+ languages & dialects</li>
+                            <li><i class="fas fa-check"></i>HD audio synthesis</li>
+                            <li><i class="fas fa-check"></i>Real-time streaming STT</li>
+                            <li><i class="fas fa-check"></i>Custom voice cloning</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
+                    </div>
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-desc">Scalable voice infra for big platforms.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>Unlimited transcription</li>
+                            <li><i class="fas fa-check"></i>On-device deployment</li>
+                            <li><i class="fas fa-check"></i>HIPAA compliance</li>
+                            <li><i class="fas fa-check"></i>Speaker diarization</li>
+                        </ul>
+                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Embeddings -->
+            <div class="api-category" id="cat-embed">
+                <div class="cat-header reveal-item">
+                    <div class="cat-icon">🔗</div>
+                    <h2>Embeddings API</h2>
+                    <p>Generate dense vector embeddings for semantic search, RAG, and recommendations.</p>
+                </div>
+                <div class="plans-grid">
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Starter</div>
+                        <div class="plan-price">Free<span>/mo</span></div>
+                        <div class="plan-desc">Build your first vector search app.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>100,000 tokens/month</li>
+                            <li><i class="fas fa-check"></i>768-dim embeddings</li>
+                            <li><i class="fas fa-check"></i>Batch size: 100</li>
+                            <li><i class="fas fa-check"></i>REST API access</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                    </div>
+                    <div class="plan-card featured reveal-item">
+                        <div class="plan-name">Scale</div>
+                        <div class="plan-price">₹349<span>/mo</span></div>
+                        <div class="plan-desc">High-volume embeddings at low cost.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>50,000,000 tokens/month</li>
+                            <li><i class="fas fa-check"></i>1,536-dim embeddings</li>
+                            <li><i class="fas fa-check"></i>Batch size: 2,048</li>
+                            <li><i class="fas fa-check"></i>Async batch jobs</li>
+                            <li><i class="fas fa-check"></i>Multilingual support</li>
+                        </ul>
+                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
+                    </div>
+                    <div class="plan-card reveal-item">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-desc">Petabyte-scale vector infra.</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i>Unlimited tokens</li>
+                            <li><i class="fas fa-check"></i>Private embedding models</li>
+                            <li><i class="fas fa-check"></i>VPC deployment</li>
+                            <li><i class="fas fa-check"></i>Vector DB integration</li>
+                        </ul>
+                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compare-note reveal-item">
+                <i class="fas fa-shield-alt" style="color:#1a73e8;margin-right:8px"></i>
+                All plans include TLS 1.3 encryption, rate limiting, and abuse protection. &nbsp;|&nbsp;
+                Need a custom plan? <a href="support.html">Talk to our team →</a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer-v10">
+        <div class="container footer-grid">
+            <div class="footer-col" style="grid-column: span 1;">
+                <div class="brand">SHOORA AI</div>
+                <p style="margin-top:24px;opacity:0.7;">© 2026 SHOORA AI API Platform.<br>Built for modern developers.</p>
+                <div style="margin-top:24px;display:flex;gap:16px;font-size:1.2rem;color:var(--text-secondary);">
+                    <i class="fab fa-twitter"></i><i class="fab fa-github"></i><i class="fab fa-discord"></i>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Products</h4>
+                <a href="pricing.html">Language AI</a>
+                <a href="pricing.html">Vision AI</a>
+                <a href="pricing.html">Code Gen</a>
+                <a href="pricing.html">Speech AI</a>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <a href="curriculum.html">API Reference</a>
+                <a href="use-cases.html">Use Cases</a>
+                <a href="status.html">System Status</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="privacy.html">Terms of Service</a>
+                <a href="support.html">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

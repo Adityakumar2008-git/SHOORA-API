@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOORA AI API | Home</title>
+    <meta name="description" content="SHOORA AI API – India's most powerful AI API platform. Access Vision, Language, Code, and more.">
+    <link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="v10-layout">
+
+    <nav class="site-nav">
+        <div class="container nav-wrap">
+            <div class="brand"><a href="index.html">SHOORA AI</a></div>
+            <div class="nav-links">
+                <a href="use-cases.html">Use Cases</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="curriculum.html">Docs</a>
+                <a href="status.html">Status</a>
+                <a href="register.html" class="nav-cta">Get API Key</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Immersive Background Hero (V10.4) -->
+    <section class="home-hero">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div class="hero-content reveal-item">
+                <span class="badge-v10">High Performance APIs</span>
+                <h1>Build With <br>SHOORA AI APIs.</h1>
+                <p>Integrate India's most powerful AI APIs into your projects. Vision, Language, Code & Embeddings — built for scale by <strong>SHOORA AI</strong>.</p>
+                <div class="home-cta">
+                    <a href="register.html" class="btn-primary">Get API Key <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></a>
+                    <a href="pricing.html" class="btn-secondary">View Pricing</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Stats Bento Grid -->
+    <section class="section-v10 bg-glass">
+        <div class="container">
+            <h2 class="center-text">Global Influence</h2>
+            <div class="bento-grid">
+                <div class="bento-item large reveal-item">
+                    <h2 class="counter">99.99%</h2>
+                    <p style="margin-top: 10px; font-weight: 600; opacity: 0.6;">Guaranteed Uptime</p>
+                    <p style="margin-top: 24px;">Reliable infrastructure ensuring your applications never experience downtime during critical operations.</p>
+                </div>
+                <div class="bento-item small reveal-item">
+                    <h2 class="counter">&lt;50ms</h2>
+                    <p style="margin-top: 10px; font-weight: 600; opacity: 0.6;">Global Latency</p>
+                </div>
+                <div class="bento-item small reveal-item">
+                    <h2>10B+</h2>
+                    <p style="margin-top: 10px; font-weight: 600; opacity: 0.6;">Monthly Requests</p>
+                </div>
+                <div class="bento-item large reveal-item">
+                    <h3>Developer First</h3>
+                    <p style="margin-top: 20px;">Seamless integration with comprehensive documentation, SDKs for all major languages, and 24/7 technical support.</p>
+                    <img src="assets/images/bento.png" alt="Tech" style="width: 100%; height: 200px; object-fit: cover; border-radius: 20px; margin-top: 32px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By -->
+    <section class="section-v10" style="background: #fafafa; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 64px 0;">
+        <div class="container center-text">
+            <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 32px;">Trusted by innovative teams worldwide</p>
+            <div style="display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; opacity: 0.5; font-size: 1.5rem; font-weight: 700;">
+                <span><i class="fab fa-aws"></i> Amazon</span>
+                <span><i class="fab fa-google"></i> Google</span>
+                <span><i class="fab fa-microsoft"></i> Microsoft</span>
+                <span><i class="fab fa-stripe"></i> Stripe</span>
+                <span><i class="fab fa-github"></i> GitHub</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Terminal Section -->
+    <section class="section-v10">
+        <div class="container">
+            <h2 class="center-text">Build in minutes.</h2>
+            <p class="center-text" style="color: var(--text-secondary); margin-top: 16px;">Seamless integration with our robust REST API.</p>
+            <div class="terminal-window reveal-item">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div style="margin-left: 24px; color: #8b949e; font-family: monospace; font-size: 0.9rem;">
+                        <span style="color: #c9d1d9; border-bottom: 2px solid #58a6ff; padding-bottom: 14px; margin-right: 16px;">curl</span>
+                        <span style="margin-right: 16px;">python</span>
+                        <span>node.js</span>
+                    </div>
+                </div>
+                <div class="terminal-body">
+                    <span class="keyword">curl</span> https://api.shooraai.tech/v1/completions \<br>
+                    &nbsp;&nbsp;<span class="keyword">-H</span> <span class="string">"Authorization: Bearer sk_live_your_api_key"</span> \<br>
+                    &nbsp;&nbsp;<span class="keyword">-H</span> <span class="string">"Content-Type: application/json"</span> \<br>
+                    &nbsp;&nbsp;<span class="keyword">-d</span> '{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"model"</span>: <span class="string">"shoora-turbo-v2"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"prompt"</span>: <span class="string">"Write a hello world program"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"max_tokens"</span>: <span class="keyword">100</span><br>
+                    &nbsp;&nbsp;}'
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrations -->
+    <section class="section-v10 bg-glass">
+        <div class="container">
+            <h2 class="center-text">Works with your stack</h2>
+            <div class="integration-grid reveal-item">
+                <div class="integration-item"><i class="fab fa-react"></i></div>
+                <div class="integration-item"><i class="fab fa-node-js"></i></div>
+                <div class="integration-item"><i class="fab fa-python"></i></div>
+                <div class="integration-item"><i class="fab fa-docker"></i></div>
+                <div class="integration-item"><i class="fab fa-aws"></i></div>
+                <div class="integration-item"><i class="fab fa-figma"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-v10">
+        <div class="container footer-grid">
+            <div class="footer-col" style="grid-column: span 1;">
+                <div class="brand">SHOORA AI</div>
+                <p style="margin-top: 24px; opacity: 0.7;">© 2026 SHOORA AI API Platform.<br>Built for modern developers.</p>
+                <div style="margin-top: 24px; display: flex; gap: 16px; font-size: 1.2rem; color: var(--text-secondary);">
+                    <i class="fab fa-twitter"></i>
+                    <i class="fab fa-github"></i>
+                    <i class="fab fa-discord"></i>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Products</h4>
+                <a href="curriculum.html">Text Generation</a>
+                <a href="curriculum.html">Embeddings</a>
+                <a href="curriculum.html">Vision Models</a>
+                <a href="pricing.html">Pricing</a>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <a href="curriculum.html">API Reference</a>
+                <a href="use-cases.html">Use Cases</a>
+                <a href="status.html">System Status</a>
+                <a href="about.html">About Us</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="privacy.html">Terms of Service</a>
+                <a href="support.html">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

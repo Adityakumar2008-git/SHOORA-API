@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support | SHOORA AI API Platform</title>
+    <link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
+    <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
+</head>
+<body class="v10-layout">
+
+    <nav class="site-nav">
+        <div class="container nav-wrap">
+            <div class="brand"><a href="index.html">SHOORA AI</a></div>
+            <div class="nav-links">
+                <a href="curriculum.html">Documentation</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="use-cases.html">Use Cases</a>
+                <a href="status.html">Status</a>
+                <a href="register.html" class="nav-cta">Get API Key</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="support-hero">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div class="reveal-item">
+                <span class="badge-v10">24/7 Support</span>
+                <h1>Contact <br>Us</h1>
+                <p style="margin-top: 32px; font-size: 1.2rem; max-width: 800px;">Our team is here to help you with any questions about API integration and billing.</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="section-v10" style="margin-top: -100px;">
+        <div class="container" style="display: flex; justify-content: center;">
+            <div class="glass-card-v10 reveal-item" style="max-width: 640px; width: 100%;">
+                <h3 style="margin-bottom: 32px; text-align: center;">Send us a Message</h3>
+                <form id="supportForm">
+                    <div style="margin-bottom: 24px;">
+                        <label class="label-v10">Full Name</label>
+                        <input type="text" name="name" class="input-v10" placeholder="Enter your full name" required>
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <label class="label-v10">Email Address</label>
+                        <input type="email" name="email" class="input-v10" placeholder="name@email.com" required>
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <label class="label-v10">Subject</label>
+                        <select name="type" class="input-v10" required>
+                            <option value="Admission">API Access</option>
+                            <option value="Curriculum">Documentation Help</option>
+                            <option value="Payment">Billing Issue</option>
+                            <option value="Other">Other Integration</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 32px;">
+                        <label class="label-v10">Your Message</label>
+                        <textarea name="message" class="input-v10" style="height: 120px; resize: none;" placeholder="How can we help you?"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Send Message</button>
+                    <div id="supportStatus" style="margin-top: 20px; text-align: center; font-weight: 500;"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-v10">
+        <div class="container footer-grid">
+            <div class="footer-col" style="grid-column: span 1;">
+                <div class="brand">SHOORA AI</div>
+                <p style="margin-top: 24px; opacity: 0.7;">© 2026 SHOORA AI API Platform.<br>Built for modern developers.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="curriculum.html">Documentation</a>
+                <a href="register.html">Get API Key</a>
+                <a href="pricing.html">Pricing</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="support.html">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
