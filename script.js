@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Global Interactions (Runs on all pages)
     initScrollRevealV6();
     initNavScrollEffectV10();
+    initMobileNavV10();
 
     // 2. Page Specific Logic
     const fullPath = window.location.pathname.toLowerCase();
@@ -266,11 +267,69 @@ function initRegistrationWizardV6() {
  */
 function initNavScrollEffectV10() {
     const nav = document.querySelector('.site-nav');
+    if (!nav) return;
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
             nav.classList.add('scrolled');
         } else {
             nav.classList.remove('scrolled');
+        }
+    });
+}
+
+/**
+ * Mobile Navigation Drawer Controller V10
+ */
+function initMobileNavV10() {
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    
+    if (!navToggle || !navLinks) return;
+
+    // Create backdrop element if it doesn't exist
+    let backdrop = document.querySelector('.nav-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'nav-backdrop';
+        document.body.appendChild(backdrop);
+    }
+
+    function toggleMenu(open) {
+        const isOpen = open !== undefined ? open : !navLinks.classList.contains('active');
+        navToggle.classList.toggle('open', isOpen);
+        navLinks.classList.toggle('active', isOpen);
+        backdrop.classList.toggle('active', isOpen);
+        navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
+    navToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu();
+    });
+
+    backdrop.addEventListener('click', () => {
+        toggleMenu(false);
+    });
+
+    // Close menu when clicking any nav link
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            toggleMenu(false);
+        });
+    });
+
+    // Close menu on Escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            toggleMenu(false);
+        }
+    });
+
+    // Reset when resizing to desktop viewport
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024 && navLinks.classList.contains('active')) {
+            toggleMenu(false);
         }
     });
 }
