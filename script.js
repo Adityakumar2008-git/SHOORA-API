@@ -861,11 +861,11 @@ function initStatusMatrixV10() {
         }
 
         return `
-            <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 12px 16px; font-weight: 600; color: #0f172a;"><i class="fas fa-robot" style="color: var(--primary); margin-right: 8px;"></i>${agent.name}</td>
-                <td style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem;">Ultra Max / Pro / Vision / Code</td>
-                <td style="padding: 12px 16px; font-weight: 700; color: ${stockCount > 0 ? '#10b981' : '#ef4444'};">${stockCount} Available</td>
-                <td style="padding: 12px 16px;">${statusBadge}</td>
+            <tr>
+                <td style="font-weight: 600; color: #0f172a;"><i class="fas fa-robot" style="color: var(--primary); margin-right: 8px;"></i>${agent.name}</td>
+                <td style="color: var(--text-secondary); font-size: 0.82rem;">Ultra Max / Pro / Vision / Code</td>
+                <td style="font-weight: 700; color: ${stockCount > 0 ? '#10b981' : '#ef4444'};">${stockCount} Available</td>
+                <td>${statusBadge}</td>
             </tr>
         `;
     }).join('');
