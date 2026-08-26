@@ -1,4 +1,4 @@
-# 🚀 SHOORA AI — Enterprise Multi-Agent API Platform
+#  SHOORA AI — Enterprise Multi-Agent API Platform
 
 <div align="center">
 
