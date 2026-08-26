@@ -634,42 +634,403 @@ th { background: #f8f9fa; color: #666; font-weight: 700; text-transform: upperca
 td { color: #333; }
 .tier-name { font-weight: 700; color: var(--primary) !important; }
 
-/* SHOORA SECURE PORTAL - Mobile V11.0 */
+/* SHOORA SECURE PORTAL - Mobile V12.0 Premium Design */
+.register-portal {
+    background: #0a0f1e !important;
+}
+
 .portal-bg { 
-    padding: 40px 0 60px; 
-    min-height: 100vh; 
-    background: linear-gradient(180deg, #0a0f1e 0%, #050a14 100%); 
+    padding: 32px 16px 60px !important; 
+    min-height: 100vh !important; 
+    background: linear-gradient(180deg, #0a0f1e 0%, #050a14 100%) !important; 
 }
+
 .portal-wrapper { 
-    grid-template-columns: 1fr; 
-    gap: 40px; 
-    padding: 0 20px; 
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 32px !important; 
+    padding: 0 !important; 
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
 }
-.portal-left { text-align: center; padding-top: 20px; }
-.portal-left h1 { font-size: 2.2rem; margin-bottom: 16px; color: #fff; }
-.portal-left p { margin: 0 auto 32px; font-size: 1rem; color: rgba(255,255,255,0.7); }
-.trust-list { display: block; margin: 0 auto 40px; max-width: 300px; text-align: left; }
-.trust-list li { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 8px; }
-.security-badges { justify-content: center; margin-top: 20px; gap: 8px; }
-.sec-badge { padding: 8px 12px; font-size: 0.7rem; }
 
-.portal-card { border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-.card-top { padding: 32px 20px; text-align: left; }
-.card-steps { margin-top: 24px; justify-content: space-between; }
-.cstep { font-size: 0.7rem; }
-.cstep-num { width: 28px; height: 28px; font-size: 0.75rem; }
-.cstep-line { margin: 0 8px; opacity: 0.3; }
-.card-body { padding: 32px 20px; min-height: 400px; text-align: left; }
+.portal-left { 
+    text-align: center !important; 
+    padding: 12px 8px !important; 
+}
+.portal-brand {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #4f8ef7 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 12px !important;
+}
+.portal-left h1 { 
+    font-size: 1.8rem !important; 
+    margin-bottom: 14px !important; 
+    color: #ffffff !important; 
+    line-height: 1.25 !important;
+    text-align: center !important;
+}
+.portal-left p { 
+    margin: 0 auto 24px !important; 
+    font-size: 0.92rem !important; 
+    color: rgba(255, 255, 255, 0.75) !important; 
+    line-height: 1.5 !important;
+    text-align: center !important;
+}
+.trust-list { 
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin: 0 auto 24px !important; 
+    padding: 0 !important;
+    list-style: none !important;
+    text-align: left !important; 
+    max-width: 320px !important;
+}
+.trust-list li { 
+    color: rgba(255, 255, 255, 0.85) !important; 
+    font-size: 0.85rem !important; 
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+.trust-list li i {
+    color: #4f8ef7 !important;
+    font-size: 0.9rem !important;
+    width: 20px !important;
+    text-align: center !important;
+}
+.security-badges { 
+    display: flex !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    margin-top: 16px !important; 
+    gap: 8px !important; 
+    flex-wrap: wrap !important;
+}
+.sec-badge { 
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 12px !important; 
+    font-size: 0.72rem !important; 
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600 !important;
+}
 
-.field-label { color: #888; font-size: 0.7rem; }
-.field-input { font-size: 0.95rem; padding: 14px 16px; border-radius: 10px; }
-.field-row { grid-template-columns: 1fr; gap: 16px; }
-.order-total .value { font-size: 1.6rem; }
-.card-footer-note { padding: 24px 20px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 16px; }
-.card-footer-note span { justify-content: center; font-size: 0.7rem; }
+/* White Card Container for Mobile */
+.portal-card { 
+    background: #ffffff !important;
+    border-radius: 20px !important; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+}
 
-/* Overrides for mobile form steps */
-.form-step-v4 { display: none; }
-.form-step-v4.active { display: block; animation: supremeEntryMobile 1s cubic-bezier(0.19, 1, 0.22, 1); }
+.card-top { 
+    background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
+    padding: 24px 20px !important; 
+    text-align: left !important; 
+}
+.card-top-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+.card-top h3 {
+    color: #ffffff !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+.card-secure {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+.card-secure i {
+    color: #4ade80 !important;
+    font-size: 0.55rem !important;
+}
+
+.card-steps { 
+    margin-top: 20px !important; 
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+.cstep { 
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 0.75rem !important; 
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-weight: 700 !important;
+}
+.cstep.active {
+    color: #ffffff !important;
+}
+.cstep-num { 
+    width: 28px !important; 
+    height: 28px !important; 
+    font-size: 0.75rem !important; 
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+}
+.cstep.active .cstep-num {
+    background: #ffffff !important;
+    color: #1a73e8 !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4) !important;
+}
+.cstep-line { 
+    flex: 1 !important;
+    height: 2px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    margin: 0 4px !important; 
+}
+
+/* Card Body & Form Fields */
+.card-body { 
+    padding: 24px 20px !important; 
+    min-height: 380px !important; 
+    text-align: left !important; 
+    background: #ffffff !important;
+}
+
+.field-group {
+    margin-bottom: 18px !important;
+    text-align: left !important;
+}
+.field-label { 
+    display: block !important;
+    color: #444444 !important; 
+    font-size: 0.75rem !important; 
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 8px !important;
+    text-align: left !important;
+}
+.field-input { 
+    width: 100% !important;
+    font-size: 0.95rem !important; 
+    padding: 14px 16px !important; 
+    border-radius: 10px !important; 
+    border: 1.5px solid #d0d7de !important;
+    background: #f6f8fa !important;
+    color: #000000 !important;
+    font-weight: 500 !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+}
+.field-input:focus {
+    border-color: #1a73e8 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.12) !important;
+}
+
+.next-btn, .pay-btn {
+    width: 100% !important;
+    padding: 16px !important;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    margin-top: 20px !important;
+    box-shadow: 0 8px 24px rgba(26, 115, 232, 0.3) !important;
+}
+.next-btn i, .pay-btn i {
+    font-size: 0.9rem !important;
+}
+
+.back-link {
+    display: block !important;
+    text-align: center !important;
+    margin-top: 14px !important;
+    color: #666666 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+}
+
+/* Plan Selector Options */
+.plan-selector {
+    margin-bottom: 20px !important;
+}
+.plan-selector label {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #555555 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 12px !important;
+    display: block !important;
+}
+.plan-options {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+.plan-option {
+    position: relative !important;
+    cursor: pointer !important;
+}
+.plan-option input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+.plan-option-box {
+    padding: 16px !important;
+    border-radius: 12px !important;
+    border: 2px solid #e1e4e8 !important;
+    background: #f6f8fa !important;
+    transition: all 0.2s !important;
+}
+.plan-option input:checked + .plan-option-box {
+    border-color: #1a73e8 !important;
+    background: rgba(26, 115, 232, 0.06) !important;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1) !important;
+}
+.plan-option-name {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+.plan-option-price {
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    color: #1a73e8 !important;
+    margin-top: 4px !important;
+}
+.plan-option-api {
+    font-size: 0.8rem !important;
+    color: #666666 !important;
+    margin-top: 2px !important;
+}
+
+/* Order Summary */
+.order-summary {
+    background: #f6f8fa !important;
+    border: 1px solid #d0d7de !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    margin-bottom: 20px !important;
+}
+.order-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 8px 0 !important;
+    font-size: 0.9rem !important;
+}
+.order-row .label {
+    color: #555555 !important;
+}
+.order-row .value {
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+.order-total {
+    border-top: 1px solid #d0d7de !important;
+    margin-top: 10px !important;
+    padding-top: 10px !important;
+}
+.order-total .label {
+    font-weight: 700 !important;
+    color: #111111 !important;
+    font-size: 1rem !important;
+}
+.order-total .value {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1a73e8 !important;
+}
+
+/* Card Footer Note */
+.card-footer-note { 
+    background: #f6f8fa !important;
+    border-top: 1px solid #e1e4e8 !important;
+    padding: 16px 20px !important; 
+    display: flex !important;
+    flex-direction: row !important; 
+    flex-wrap: wrap !important; 
+    justify-content: center !important; 
+    gap: 16px !important; 
+}
+.card-footer-note span { 
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    justify-content: center !important; 
+    font-size: 0.75rem !important; 
+    color: #666666 !important;
+    font-weight: 600 !important;
+}
+
+/* Form Steps Entry Animation */
+.form-step-v4 { display: none !important; }
+.form-step-v4.active { 
+    display: block !important; 
+    animation: supremeEntryMobile 0.4s ease-out !important; 
+}
+
+@keyframes supremeEntryMobile {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Success Modal on Mobile */
+.modal-v4 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+}
+.modal-card-v4 {
+    background: #ffffff !important;
+    border-radius: 20px !important;
+    padding: 32px 24px !important;
+    max-width: 400px !important;
+    width: 100% !important;
+    text-align: center !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
 
 .brand { font-size: 1.1rem !important; }
