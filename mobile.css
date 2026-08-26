@@ -80,6 +80,48 @@ body::before {
 }
 .brand i { color: var(--primary); font-size: 1.1rem; }
 
+.nav-right-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-mobile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #000000;
+    color: #ffffff;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.nav-mobile-btn i {
+    font-size: 0.8rem;
+}
+
+.nav-mobile-btn:hover {
+    background: #1a73e8;
+    color: #ffffff;
+}
+
+.nav-mobile-btn.nav-mobile-btn-dashboard {
+    background: #1a73e8;
+    color: #ffffff;
+    border-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25);
+}
+
+.nav-mobile-btn.nav-mobile-btn-dashboard:hover {
+    background: #1557b0;
+}
+
 /* Hamburger Toggle Button */
 .nav-toggle {
     display: flex;
@@ -270,8 +312,47 @@ body::before {
     word-wrap: break-word; overflow-wrap: break-word;
 }
 
-.btn-primary { width: 100%; padding: 18px; background: #000; color: #fff; border-radius: 6px; font-weight: 600; font-size: 0.95rem; }
-.btn-secondary { width: 100%; padding: 18px; border: 1px solid var(--border); color: var(--text-primary); border-radius: 6px; font-weight: 600; font-size: 0.95rem; margin-top: 12px; }
+.home-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #000;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
 
 /* IMAGE ALIGNMENT MASTER (V10.6 Fix) */
 .hero-visual-v10, .syllabus-img-v10, .story-visual-v10, .preview-visual-v10 { 

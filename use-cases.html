@@ -17,11 +17,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html" class="active"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -29,7 +34,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -37,8 +42,8 @@
     <section class="about-hero">
         <div class="container" style="display: flex; align-items: center; justify-content: center; text-align: center;">
             <div class="hero-content reveal-item">
-                <h1>Solutions for every stack.</h1>
-                <p>See how companies are building the next generation of software using SHOORA AI API.</p>
+                <h1>Specialized Agent Solutions.</h1>
+                <p>Explore production deployment patterns across 20+ domain-trained AI Agents powered by SHOORA AI's multi-model API matrix.</p>
             </div>
         </div>
     </section>
@@ -47,23 +52,23 @@
         <div class="container">
             <div class="bento-grid reveal-item">
                 <div class="bento-item large">
-                    <h2 style="font-size: 2rem;">Customer Support Automation</h2>
-                    <p style="margin-top: 16px; color: var(--text-secondary);">Build intelligent chatbots that understand context and resolve customer issues instantly. Integrate easily with Zendesk, Intercom, or custom portals.</p>
+                    <h2 style="font-size: 2rem;">Code Architect & Security Auditor Agents</h2>
+                    <p style="margin-top: 16px; color: var(--text-secondary);">Deploy specialized agents trained specifically on AST parsing, vulnerability scanning, refactoring, and CI/CD Kubernetes pipeline generation. Powered by Shoora-Code Specialist & Shoora-Ultra Max.</p>
                     <div style="margin-top: 32px; display: flex; gap: 16px; color: var(--primary); font-size: 1.5rem;">
-                        <i class="fas fa-robot"></i> <i class="fas fa-headset"></i>
+                        <i class="fas fa-code"></i> <i class="fas fa-shield-alt"></i> <i class="fas fa-terminal"></i>
                     </div>
                 </div>
                 <div class="bento-item small">
-                    <h2 style="font-size: 2rem;">Content Generation</h2>
-                    <p style="margin-top: 16px; color: var(--text-secondary);">Automate writing marketing copy, product descriptions, and emails with highly optimized language models.</p>
+                    <h2 style="font-size: 2rem;">Legal & Medical AI Agents</h2>
+                    <p style="margin-top: 16px; color: var(--text-secondary);">High-precision Level 5 Sovereign models trained for contract summarization, compliance auditing, clinical literature analysis, and HIPAA-compliant data parsing.</p>
                 </div>
                 <div class="bento-item small">
-                    <h2 style="font-size: 2rem;">Data Extraction</h2>
-                    <p style="margin-top: 16px; color: var(--text-secondary);">Turn unstructured text into structured JSON. Extract entities, sentiment, and intent perfectly.</p>
+                    <h2 style="font-size: 2rem;">Quant Trader & Financial AI</h2>
+                    <p style="margin-top: 16px; color: var(--text-secondary);">Sub-40ms real-time market signal processing, sentiment extraction from financial news streams, and automated SQL query generation for quantitative databases.</p>
                 </div>
                 <div class="bento-item large">
-                    <h2 style="font-size: 2rem;">Semantic Search & RAG</h2>
-                    <p style="margin-top: 16px; color: var(--text-secondary);">Power your internal search engines using our industry-leading embeddings API. Build Retrieval-Augmented Generation systems in hours, not weeks.</p>
+                    <h2 style="font-size: 2rem;">Vision Analyst & Real-Time Voice Agents</h2>
+                    <p style="margin-top: 16px; color: var(--text-secondary);">Combine OCR, multimodal frame analysis, and ultra-low latency audio synthesis for autonomous customer support copilots, video scene understanding, and polyglot translation across 100+ native languages.</p>
                     <img src="assets/images/campus.png" alt="RAG" style="width: 100%; height: 200px; object-fit: cover; border-radius: 20px; margin-top: 32px; filter: grayscale(50%);">
                 </div>
             </div>
@@ -107,6 +112,7 @@
             </div>
         </div>
     </footer>
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

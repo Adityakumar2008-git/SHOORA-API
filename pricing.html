@@ -3,42 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Pricing | SHOORA AI API Platform</title>
+    <title>Dynamic API Pricing & Matrix | SHOORA AI Platform</title>
     <link rel="stylesheet" href="desktop.css" media="(min-width: 1024px)">
     <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .api-tabs { display: flex; gap: 12px; margin: 48px 0 40px; flex-wrap: wrap; justify-content: center; }
-        .api-tab { padding: 10px 24px; border-radius: 40px; border: 1.5px solid var(--border, #e0e0e0); background: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.3s; letter-spacing: 0.5px; }
-        .api-tab.active, .api-tab:hover { background: #000; color: #fff; border-color: #000; }
-        .api-category { display: none; }
-        .api-category.active { display: block; }
-        .cat-header { text-align: center; margin-bottom: 48px; }
-        .cat-header .cat-icon { font-size: 3rem; margin-bottom: 16px; }
-        .cat-header h2 { font-size: 2.8rem; font-weight: 400; letter-spacing: -0.04em; }
-        .cat-header p { color: #666; margin-top: 12px; font-size: 1.1rem; }
-        .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-        @media (max-width: 1023px) { .plans-grid { grid-template-columns: 1fr; } }
-        .plan-card { background: #fff; border: 1.5px solid #eee; border-radius: 20px; padding: 40px; position: relative; transition: 0.3s; }
-        .plan-card:hover { border-color: #1a73e8; box-shadow: 0 20px 60px rgba(26,115,232,0.08); transform: translateY(-4px); }
-        .plan-card.featured { border: 2px solid #1a73e8; }
-        .plan-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: #1a73e8; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; letter-spacing: 1.5px; }
-        .plan-name { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; }
-        .plan-price { font-size: 3.2rem; font-weight: 700; letter-spacing: -2px; margin: 16px 0 4px; }
-        .plan-price span { font-size: 1rem; font-weight: 400; color: #888; letter-spacing: 0; }
-        .plan-desc { color: #888; font-size: 0.9rem; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid #f0f0f5; }
-        .plan-features { list-style: none; padding: 0; margin: 0 0 32px; }
-        .plan-features li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; color: #444; font-size: 0.95rem; }
-        .plan-features li i { color: #1a73e8; margin-top: 3px; flex-shrink: 0; }
-        .plan-btn { display: block; text-align: center; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: 0.3s; }
-        .plan-btn-primary { background: #000; color: #fff; }
-        .plan-btn-primary:hover { background: #1a73e8; }
-        .plan-btn-secondary { background: #f5f5f7; color: #000; }
-        .plan-btn-secondary:hover { background: #e5e5ea; }
-        .section-divider { text-align: center; padding: 80px 0 0; }
-        .section-divider h2 { font-size: 3rem; font-weight: 400; letter-spacing: -0.04em; }
-        .compare-note { text-align: center; margin-top: 60px; padding: 24px; background: #f8f8fb; border-radius: 12px; color: #666; font-size: 0.95rem; }
-        .compare-note a { color: #1a73e8; font-weight: 600; text-decoration: none; }
+        .pricing-hero {
+            padding: 100px 0 60px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 0%, rgba(26, 115, 232, 0.08), transparent 70%);
+        }
+
+        .calc-wrapper {
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 28px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 80px;
+            transition: 0.3s;
+        }
+
+        .calc-header-bar {
+            background: #0f172a;
+            color: #fff;
+            padding: 32px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calc-header-title h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+        }
+
+        .calc-header-title p {
+            color: #94a3b8;
+            margin-top: 6px;
+            font-size: 0.95rem;
+        }
+
+        .calc-body {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 1023px) {
+            .calc-body {
+                grid-template-columns: 1fr;
+                padding: 24px;
+            }
+            .calc-header-bar {
+                padding: 24px;
+            }
+        }
+
+        .calc-config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .calc-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .calc-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .calc-label i {
+            color: #1a73e8;
+        }
+
+        .calc-select {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .calc-select:focus, .calc-select:hover {
+            border-color: #1a73e8;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+        }
+
+        /* Option Pills Grid */
+        .option-pills {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .pill-btn {
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .pill-btn.active, .pill-btn:hover {
+            border-color: #1a73e8;
+            background: #1a73e8;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(26, 115, 232, 0.25);
+        }
+
+        /* Live Price Summary Panel */
+        .calc-summary-panel {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 20px;
+            padding: 36px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .summary-badge {
+            align-self: flex-start;
+            background: rgba(26, 115, 232, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(26, 115, 232, 0.4);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .summary-price-box {
+            margin: 28px 0;
+        }
+
+        .summary-price-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-price-val {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-top: 10px;
+        }
+
+        .summary-price-val span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #94a3b8;
+            letter-spacing: 0;
+        }
+
+        .summary-breakdown {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            margin-bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .breakdown-row span.val {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .btn-activate-api {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            background: #1a73e8;
+            color: #fff;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0 8px 24px rgba(26, 115, 232, 0.35);
+        }
+
+        .btn-activate-api:hover {
+            background: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(26, 115, 232, 0.45);
+        }
+
+        /* Matrix Table */
+        .matrix-card {
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 36px;
+            margin-top: 40px;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        .matrix-table th {
+            padding: 16px;
+            text-align: left;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #475569;
+        }
+
+        .matrix-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.95rem;
+            color: #334155;
+        }
     </style>
 </head>
 <body class="v10-layout">
@@ -50,11 +279,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html" class="active"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -62,287 +296,209 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
 
-    <section class="pricing-hero about-hero">
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
         <div class="container">
             <div class="hero-content reveal-item">
-                <span class="badge-v10">Transparent Pricing</span>
-                <h1>Simple, Scalable<br>API Pricing.</h1>
-                <p>Choose the API category that fits your project. Pay only for what you use. No hidden fees.</p>
+                <span class="badge-v10">Dynamic API Engine</span>
+                <h1 style="font-size: 3.2rem; font-weight: 700; letter-spacing: -1.5px; margin-top: 16px;">Configure Your API.<br>Pay Exactly What You Need.</h1>
+                <p style="color: #64748b; font-size: 1.15rem; max-width: 680px; margin: 16px auto 0;">No fixed monthly traps. Select your AI Agent task, base foundation model, fine-tuning precision level, and daily usage limit.</p>
             </div>
         </div>
     </section>
 
-    <section class="section-v10 pricing-section">
+    <!-- Dynamic Calculator Section -->
+    <section class="section-v10" style="padding-top: 0;">
         <div class="container">
+            
+            <div class="calc-wrapper reveal-item">
+                <div class="calc-header-bar">
+                    <div class="calc-header-title">
+                        <h2>Interactive Dynamic API Calculator</h2>
+                        <p>Real-time multi-factor pricing matrix tailored to your exact application stack.</p>
+                    </div>
+                    <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.8rem; font-weight: 700; padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.4);">
+                        <i class="fas fa-bolt" style="margin-right: 6px;"></i> Live Calculation
+                    </span>
+                </div>
 
-            <!-- Category Tabs -->
-            <div class="api-tabs">
-                <button class="api-tab active" onclick="showCategory('language')"><i class="fas fa-brain"></i>Language AI</button>
-                <button class="api-tab" onclick="showCategory('vision')"><i class="fas fa-eye"></i>Vision AI</button>
-                <button class="api-tab" onclick="showCategory('code')"><i class="fas fa-code"></i>Code Gen</button>
-                <button class="api-tab" onclick="showCategory('speech')"><i class="fas fa-microphone"></i>Speech AI</button>
-                <button class="api-tab" onclick="showCategory('embed')"><i class="fas fa-vector-square"></i>Embeddings</button>
-            </div>
+                <div class="calc-body">
+                    <!-- Left: Configuration Selectors -->
+                    <div class="calc-config-section">
+                        
+                        <!-- 1. Agent Selection -->
+                        <div class="calc-group">
+                            <label class="calc-label"><i class="fas fa-robot"></i> 1. Select Specialized AI Agent (20+ Trained Agents)</label>
+                            <select id="pCalcAgent" class="calc-select" onchange="runPageCalculator()">
+                                <option value="omni" selected>Shoora Omni-Generalist (Super-Agent) — High-Performance All-Rounder</option>
+                                <option value="code">Code Architect & Refactoring Agent — Deep Syntax & Logic</option>
+                                <option value="vision">Vision Analyst & OCR Agent — Multimodal Image & Document Analysis</option>
+                                <option value="legal">Legal Document & Contract Summarizer — High-Precision Analysis</option>
+                                <option value="medical">Medical Research & Literature Agent — Clinical Insights</option>
+                                <option value="quant">Financial Quant & Market Trader — Real-Time Signal Processing</option>
+                                <option value="cyber">Cybersecurity & Code Auditor — Vulnerability Detection</option>
+                                <option value="voice">Real-time Voice Synthesizer — Ultra-Low Latency Audio</option>
+                                <option value="data">Structured Data Extraction Bot — JSON/CSV Automation</option>
+                                <option value="seo">SEO & Content Strategist — High-Volume Optimization</option>
+                                <option value="support">Customer Support Copilot — Multilingual Assistance</option>
+                                <option value="math">Complex Math & Reasoning Engine — Multi-Step Proofs</option>
+                                <option value="translation">Polyglot Translation Engine — 100+ Native Languages</option>
+                                <option value="creative">Creative Copywriting Assistant — Marketing & Narrative</option>
+                                <option value="sql">SQL & Database Query Generator — Complex Joins & Schema</option>
+                                <option value="devops">DevOps & CI/CD Automation — Kubernetes & Terraform</option>
+                                <option value="sentiment">Sentiment & Intent Classifier — Fast Stream Processing</option>
+                                <option value="transcribe">Audio Transcription Engine — High-Fidelity Speech-to-Text</option>
+                                <option value="video">Video Scene & Frame Analyzer — Temporal Scene Detection</option>
+                                <option value="quiz">Assessment & Quiz Generator — Curriculum AI</option>
+                                <option value="uiux">UI/UX Design Spec Generator — Component Wireframes</option>
+                            </select>
+                        </div>
 
-            <!-- Language AI -->
-            <div class="api-category active" id="cat-language">
-                <div class="cat-header reveal-item">
-                    <div class="cat-icon">🧠</div>
-                    <h2>Language AI API</h2>
-                    <p>Powerful text generation, summarization, Q&A, and chat completion models.</p>
-                </div>
-                <div class="plans-grid">
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Starter</div>
-                        <div class="plan-price">Free<span>/mo</span></div>
-                        <div class="plan-desc">Perfect for prototyping and exploration.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>1,000 API calls/month</li>
-                            <li><i class="fas fa-check"></i>shoora-lite-v1 model</li>
-                            <li><i class="fas fa-check"></i>4,096 token context</li>
-                            <li><i class="fas fa-check"></i>Community support</li>
-                            <li><i class="fas fa-check"></i>REST API access</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
-                    </div>
-                    <div class="plan-card featured reveal-item">
-                        <div class="plan-name">Growth</div>
-                        <div class="plan-price">₹499<span>/mo</span></div>
-                        <div class="plan-desc">For growing apps that need reliable performance.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>500,000 API calls/month</li>
-                            <li><i class="fas fa-check"></i>shoora-turbo-v2 model</li>
-                            <li><i class="fas fa-check"></i>32,768 token context</li>
-                            <li><i class="fas fa-check"></i>Priority email support</li>
-                            <li><i class="fas fa-check"></i>Streaming responses</li>
-                            <li><i class="fas fa-check"></i>Function calling</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
-                    </div>
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-desc">Dedicated capacity with SLA guarantees.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>Unlimited API calls</li>
-                            <li><i class="fas fa-check"></i>shoora-ultra model access</li>
-                            <li><i class="fas fa-check"></i>128K token context</li>
-                            <li><i class="fas fa-check"></i>24/7 dedicated support</li>
-                            <li><i class="fas fa-check"></i>Custom fine-tuning</li>
-                            <li><i class="fas fa-check"></i>99.99% SLA uptime</li>
-                        </ul>
-                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
-                    </div>
-                </div>
-            </div>
+                        <!-- 2. Foundation Model -->
+                        <div class="calc-group">
+                            <label class="calc-label"><i class="fas fa-microchip"></i> 2. Select Backend Foundation Model</label>
+                            <select id="pCalcModel" class="calc-select" onchange="runPageCalculator()">
+                                <option value="ultra" selected>Shoora-Ultra Max (SOTA 1.5M Context Window)</option>
+                                <option value="pro">Shoora-Pro v4 (High-Speed Balanced Model)</option>
+                                <option value="lite">Shoora-Lite v2 (Low-Latency Turbo Engine)</option>
+                                <option value="vision">Shoora-Vision Pro (Multimodal Visual Model)</option>
+                                <option value="code">Shoora-Code Specialist (Deep Algorithmic Logic)</option>
+                            </select>
+                        </div>
 
-            <!-- Vision AI -->
-            <div class="api-category" id="cat-vision">
-                <div class="cat-header reveal-item">
-                    <div class="cat-icon">👁️</div>
-                    <h2>Vision AI API</h2>
-                    <p>Image understanding, object detection, OCR, and visual Q&A at scale.</p>
-                </div>
-                <div class="plans-grid">
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Starter</div>
-                        <div class="plan-price">Free<span>/mo</span></div>
-                        <div class="plan-desc">Try vision capabilities at no cost.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>500 image requests/month</li>
-                            <li><i class="fas fa-check"></i>Basic object detection</li>
-                            <li><i class="fas fa-check"></i>Image classification</li>
-                            <li><i class="fas fa-check"></i>5MB max image size</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
-                    </div>
-                    <div class="plan-card featured reveal-item">
-                        <div class="plan-name">Pro Vision</div>
-                        <div class="plan-price">₹799<span>/mo</span></div>
-                        <div class="plan-desc">Advanced vision tasks for production apps.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>100,000 image requests/month</li>
-                            <li><i class="fas fa-check"></i>OCR & document parsing</li>
-                            <li><i class="fas fa-check"></i>Visual Q&A (VQA)</li>
-                            <li><i class="fas fa-check"></i>20MB max image size</li>
-                            <li><i class="fas fa-check"></i>Batch image processing</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
-                    </div>
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-desc">High-throughput vision pipelines.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>Unlimited requests</li>
-                            <li><i class="fas fa-check"></i>Video frame analysis</li>
-                            <li><i class="fas fa-check"></i>Custom model training</li>
-                            <li><i class="fas fa-check"></i>On-premise deployment</li>
-                        </ul>
-                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
-                    </div>
-                </div>
-            </div>
+                        <!-- 3. Fine-Tuning & Accuracy Level -->
+                        <div class="calc-group">
+                            <label class="calc-label"><i class="fas fa-bullseye"></i> 3. Fine-Tuning & Accuracy Level</label>
+                            <div class="option-pills">
+                                <button type="button" class="pill-btn" onclick="selectPill('accuracy', '1')">Level 1 (Base)</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('accuracy', '2')">Level 2 (Domain)</button>
+                                <button type="button" class="pill-btn active" onclick="selectPill('accuracy', '3')">Level 3 (High-Acc)</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('accuracy', '4')">Level 4 (Expert)</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('accuracy', '5')">Level 5 (Sovereign)</button>
+                            </div>
+                        </div>
 
-            <!-- Code Gen -->
-            <div class="api-category" id="cat-code">
-                <div class="cat-header reveal-item">
-                    <div class="cat-icon">💻</div>
-                    <h2>Code Generation API</h2>
-                    <p>AI-powered code completion, review, documentation, and debugging.</p>
-                </div>
-                <div class="plans-grid">
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Dev</div>
-                        <div class="plan-price">Free<span>/mo</span></div>
-                        <div class="plan-desc">Ideal for individual developers.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>2,000 completions/month</li>
-                            <li><i class="fas fa-check"></i>15+ programming languages</li>
-                            <li><i class="fas fa-check"></i>2,048 token context</li>
-                            <li><i class="fas fa-check"></i>Code explanation</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
+                        <!-- 4. Daily Usage Capacity -->
+                        <div class="calc-group">
+                            <label class="calc-label"><i class="fas fa-tachometer-alt"></i> 4. Daily Request Capacity Limit</label>
+                            <div class="option-pills">
+                                <button type="button" class="pill-btn" onclick="selectPill('usage', '1k')">1,000 req/day</button>
+                                <button type="button" class="pill-btn active" onclick="selectPill('usage', '10k')">10,000 req/day</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('usage', '50k')">50,000 req/day</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('usage', '250k')">250,000 req/day</button>
+                                <button type="button" class="pill-btn" onclick="selectPill('usage', 'unlimited')">Unlimited</button>
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="plan-card featured reveal-item">
-                        <div class="plan-name">Team</div>
-                        <div class="plan-price">₹999<span>/mo</span></div>
-                        <div class="plan-desc">For engineering teams shipping fast.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>1,000,000 tokens/month</li>
-                            <li><i class="fas fa-check"></i>50+ programming languages</li>
-                            <li><i class="fas fa-check"></i>16K token context</li>
-                            <li><i class="fas fa-check"></i>Code review & refactoring</li>
-                            <li><i class="fas fa-check"></i>Auto-documentation</li>
-                            <li><i class="fas fa-check"></i>IDE plugin support</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
-                    </div>
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-desc">For large engineering orgs.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>Unlimited tokens</li>
-                            <li><i class="fas fa-check"></i>Private codebase training</li>
-                            <li><i class="fas fa-check"></i>Security audit logs</li>
-                            <li><i class="fas fa-check"></i>SOC2 compliance</li>
-                        </ul>
-                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
+
+                    <!-- Right: Live Summary Panel -->
+                    <div class="calc-summary-panel">
+                        <div>
+                            <span class="summary-badge"><i class="fas fa-check-circle" style="margin-right: 6px;"></i> API Package Ready</span>
+                            
+                            <div class="summary-price-box">
+                                <div class="summary-price-label">Calculated Key Price</div>
+                                <div class="summary-price-val" id="pSummaryPrice">₹6,907 <span>one-time key</span></div>
+                            </div>
+
+                            <div class="summary-breakdown">
+                                <div class="breakdown-row">
+                                    <span>Configured Agent:</span>
+                                    <span class="val" id="pbAgentName">Shoora Omni</span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Foundation Model:</span>
+                                    <span class="val" id="pbModelName">Shoora-Ultra Max</span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Accuracy Precision:</span>
+                                    <span class="val" id="pbAccLevel">Level 3</span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Daily Rate Limit:</span>
+                                    <span class="val" id="pbUsageLimit">10,000 req/day</span>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>SLA Uptime:</span>
+                                    <span class="val" style="color: #34d399;">99.99% Guaranteed</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="register.html" class="btn-activate-api">
+                            Get Custom API Key <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Speech AI -->
-            <div class="api-category" id="cat-speech">
-                <div class="cat-header reveal-item">
-                    <div class="cat-icon">🎙️</div>
-                    <h2>Speech AI API</h2>
-                    <p>Speech-to-text transcription and text-to-speech synthesis in 30+ languages.</p>
+            <!-- Features & SLA Matrix -->
+            <div class="matrix-card reveal-item">
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin: 0; color: #0f172a;"><i class="fas fa-shield-alt" style="color: #1a73e8; margin-right: 8px;"></i> Enterprise Capability & SLA Matrix</h3>
+                <p style="color: #64748b; font-size: 0.95rem; margin-top: 6px;">Every API key issued by SHOORA AI comes with enterprise-grade infrastructure controls.</p>
+                
+                <div style="overflow-x: auto;">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Precision Level</th>
+                                <th>Training Focus</th>
+                                <th>Latency Guarantee</th>
+                                <th>Security & Encryption</th>
+                                <th>Support SLA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Level 1 (Base)</strong></td>
+                                <td>Standard Foundation Weights</td>
+                                <td>&lt; 250ms</td>
+                                <td>TLS 1.3 Standard Encryption</td>
+                                <td>Community Support</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 2 (Refined)</strong></td>
+                                <td>Domain Fine-Tuned Datasets</td>
+                                <td>&lt; 180ms</td>
+                                <td>AES-256 + PCI-DSS Compliant</td>
+                                <td>Standard Email Support</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 3 (High-Acc)</strong></td>
+                                <td>Advanced RAG & Logic Tuning</td>
+                                <td>&lt; 120ms</td>
+                                <td>SOC2 Type II + Encrypted Key Vault</td>
+                                <td>24/7 Priority Support</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 4 (Expert)</strong></td>
+                                <td>Deep Synthetic RLHF Optimization</td>
+                                <td>&lt; 80ms</td>
+                                <td>Zero-Data Retention Policy</td>
+                                <td>1-Hour SLA Emergency Response</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 5 (Sovereign)</strong></td>
+                                <td>Dedicated Isolated Cluster Weights</td>
+                                <td>&lt; 40ms Dedicated</td>
+                                <td>Air-Gapped Private VPC Option</td>
+                                <td>Dedicated Solutions Architect</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="plans-grid">
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Basic</div>
-                        <div class="plan-price">Free<span>/mo</span></div>
-                        <div class="plan-desc">Test voice features in your app.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>60 min transcription/month</li>
-                            <li><i class="fas fa-check"></i>10 languages</li>
-                            <li><i class="fas fa-check"></i>Standard audio quality</li>
-                            <li><i class="fas fa-check"></i>MP3/WAV support</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
-                    </div>
-                    <div class="plan-card featured reveal-item">
-                        <div class="plan-name">Pro</div>
-                        <div class="plan-price">₹649<span>/mo</span></div>
-                        <div class="plan-desc">Production-grade voice for your platform.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>5,000 min transcription/month</li>
-                            <li><i class="fas fa-check"></i>30+ languages & dialects</li>
-                            <li><i class="fas fa-check"></i>HD audio synthesis</li>
-                            <li><i class="fas fa-check"></i>Real-time streaming STT</li>
-                            <li><i class="fas fa-check"></i>Custom voice cloning</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
-                    </div>
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-desc">Scalable voice infra for big platforms.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>Unlimited transcription</li>
-                            <li><i class="fas fa-check"></i>On-device deployment</li>
-                            <li><i class="fas fa-check"></i>HIPAA compliance</li>
-                            <li><i class="fas fa-check"></i>Speaker diarization</li>
-                        </ul>
-                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Embeddings -->
-            <div class="api-category" id="cat-embed">
-                <div class="cat-header reveal-item">
-                    <div class="cat-icon">🔗</div>
-                    <h2>Embeddings API</h2>
-                    <p>Generate dense vector embeddings for semantic search, RAG, and recommendations.</p>
-                </div>
-                <div class="plans-grid">
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Starter</div>
-                        <div class="plan-price">Free<span>/mo</span></div>
-                        <div class="plan-desc">Build your first vector search app.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>100,000 tokens/month</li>
-                            <li><i class="fas fa-check"></i>768-dim embeddings</li>
-                            <li><i class="fas fa-check"></i>Batch size: 100</li>
-                            <li><i class="fas fa-check"></i>REST API access</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-secondary">Get Started Free</a>
-                    </div>
-                    <div class="plan-card featured reveal-item">
-                        <div class="plan-name">Scale</div>
-                        <div class="plan-price">₹349<span>/mo</span></div>
-                        <div class="plan-desc">High-volume embeddings at low cost.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>50,000,000 tokens/month</li>
-                            <li><i class="fas fa-check"></i>1,536-dim embeddings</li>
-                            <li><i class="fas fa-check"></i>Batch size: 2,048</li>
-                            <li><i class="fas fa-check"></i>Async batch jobs</li>
-                            <li><i class="fas fa-check"></i>Multilingual support</li>
-                        </ul>
-                        <a href="register.html" class="plan-btn plan-btn-primary">Buy API Key</a>
-                    </div>
-                    <div class="plan-card reveal-item">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-desc">Petabyte-scale vector infra.</div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i>Unlimited tokens</li>
-                            <li><i class="fas fa-check"></i>Private embedding models</li>
-                            <li><i class="fas fa-check"></i>VPC deployment</li>
-                            <li><i class="fas fa-check"></i>Vector DB integration</li>
-                        </ul>
-                        <a href="support.html" class="plan-btn plan-btn-secondary">Contact Sales</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="compare-note reveal-item">
-                <i class="fas fa-shield-alt" style="color:#1a73e8;margin-right:8px"></i>
-                All plans include TLS 1.3 encryption, rate limiting, and abuse protection. &nbsp;|&nbsp;
-                Need a custom plan? <a href="support.html">Talk to our team →</a>
             </div>
 
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer-v10">
         <div class="container footer-grid">
             <div class="footer-col footer-brand-col">
@@ -376,11 +532,53 @@
                 <h4>Legal & Support</h4>
                 <a href="privacy.html">Privacy Policy</a>
                 <a href="support.html">Contact Support</a>
-                <a href="register.html">Get API Key</a>
+                <a href="register.html" style="color: var(--primary); font-weight: 600;">Get API Key</a>
             </div>
         </div>
     </footer>
 
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
+    <script>
+        let currentAccuracyState = '3';
+        let currentUsageState = '10k';
+
+        function selectPill(type, val) {
+            const container = event.currentTarget.parentElement;
+            container.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (type === 'accuracy') currentAccuracyState = val;
+            if (type === 'usage') currentUsageState = val;
+
+            runPageCalculator();
+        }
+
+        function runPageCalculator() {
+            const agent = document.getElementById('pCalcAgent').value;
+            const model = document.getElementById('pCalcModel').value;
+            
+            if (typeof calculateShooraPrice === 'function') {
+                const price = calculateShooraPrice(agent, model, currentAccuracyState, currentUsageState);
+                
+                document.getElementById('pSummaryPrice').innerHTML = '₹' + price.toLocaleString('en-IN') + ' <span>one-time key</span>';
+                
+                document.getElementById('pbAgentName').textContent = (SHOORA_PRICE_MATRIX.agents[agent]?.name || agent).split('—')[0].trim();
+                document.getElementById('pbModelName').textContent = (SHOORA_PRICE_MATRIX.models[model]?.name || model).split('(')[0].trim();
+                document.getElementById('pbAccLevel').textContent = 'Level ' + currentAccuracyState;
+                document.getElementById('pbUsageLimit').textContent = SHOORA_PRICE_MATRIX.usage[currentUsageState]?.name || currentUsageState;
+
+                // Sync CTA link query parameters
+                const checkoutBtn = document.querySelector('.btn-activate-api');
+                if (checkoutBtn) {
+                    checkoutBtn.href = `register.html?agent=${agent}&model=${model}&accuracy=${currentAccuracyState}&usage=${currentUsageState}`;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            runPageCalculator();
+        });
+    </script>
 </body>
 </html>

@@ -8,6 +8,23 @@
     <link rel="stylesheet" href="mobile.css" media="(max-width: 1023px)">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCP-3cBN-UACDgmrL3lZAC9Tz6qnpeP6VU",
+            authDomain: "shoraai.firebaseapp.com",
+            projectId: "shoraai",
+            storageBucket: "shoraai.firebasestorage.app",
+            messagingSenderId: "575119680760",
+            appId: "1:575119680760:web:14979508fbfa498b58470d",
+            measurementId: "G-BDZKB9RMNQ"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    </script>
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </head>
 <body class="register-portal">
@@ -21,11 +38,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -33,7 +55,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta active"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -69,9 +91,9 @@
             <div class="portal-card">
                 <div class="card-top">
                     <div class="card-top-row">
-                        <h3>API Activation</h3>
+                        <h3>API Configuration</h3>
                         <div class="card-secure">
-                            <i class="fas fa-circle"></i> Secure Link
+                            <i class="fas fa-shield-halved" style="color: #10b981;"></i> Authenticated Vault
                         </div>
                     </div>
                     
@@ -83,109 +105,127 @@
                         <div class="cstep" data-for="2">
                             <div class="cstep-num">2</div>
                         </div>
-                        <div class="cstep-line"></div>
-                        <div class="cstep" data-for="3">
-                            <div class="cstep-num">3</div>
-                        </div>
-                        <div class="cstep-line"></div>
-                        <div class="cstep" data-for="4">
-                            <div class="cstep-num">4</div>
-                        </div>
                     </div>
                 </div>
 
                 <div class="card-body">
+                    <!-- Auth State Banner -->
+                    <div id="checkoutAuthNotice" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <i class="fas fa-user-circle" style="color: #1a73e8; margin-right: 6px;"></i> Account: <strong id="checkoutUserBadge">Checking auth...</strong>
+                        </div>
+                        <span id="checkoutAuthStatus" style="color: #10b981; font-weight: 600;">Verified</span>
+                    </div>
+
                     <form id="registrationForm">
-                        <!-- Step 1: Personal -->
+                        <!-- Step 1: API & Agent Configuration -->
                         <div class="form-step-v4 active" data-step="1">
                             <div class="field-group">
-                                <label class="field-label">Full Name</label>
-                                <input type="text" name="fullName" class="field-input" placeholder="Your name" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Email Address</label>
-                                <input type="email" name="email" class="field-input" placeholder="you@company.com" required>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Mobile Number</label>
-                                <input type="tel" name="mobile" class="field-input" placeholder="+91 00000 00000" required>
-                            </div>
-                            <button type="button" class="next-btn next-btn-portal">Continue <i class="fas fa-arrow-right"></i></button>
-                        </div>
-
-                        <!-- Step 2: Use Case -->
-                        <div class="form-step-v4" data-step="2">
-                            <div class="field-group">
-                                <label class="field-label">Organization</label>
-                                <input type="text" name="organization" class="field-input" placeholder="Company Name">
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Primary Use Case</label>
-                                <select name="useCase" class="field-input">
-                                    <option value="commercial">Commercial App</option>
-                                    <option value="research">Academic Research</option>
-                                    <option value="personal">Personal Project</option>
+                                <label class="field-label">AI Agent Task</label>
+                                <select name="agent" id="regAgentSelect" class="field-input" onchange="updateDynamicRegistrationPrice()">
+                                    <option value="omni" selected>Shoora Omni-Generalist (Super-Agent)</option>
+                                    <option value="code">Code Architect & Refactoring Agent</option>
+                                    <option value="vision">Vision Analyst & OCR Agent</option>
+                                    <option value="legal">Legal Document & Contract Summarizer</option>
+                                    <option value="medical">Medical Research & Literature Agent</option>
+                                    <option value="quant">Financial Quant & Market Trader</option>
+                                    <option value="cyber">Cybersecurity & Code Auditor</option>
+                                    <option value="voice">Real-time Voice Synthesizer</option>
+                                    <option value="data">Structured Data Extraction Bot</option>
+                                    <option value="seo">SEO & Content Strategist</option>
+                                    <option value="support">Customer Support Copilot</option>
+                                    <option value="math">Complex Math & Reasoning Engine</option>
+                                    <option value="translation">Polyglot Translation Engine</option>
+                                    <option value="creative">Creative Copywriting Assistant</option>
+                                    <option value="sql">SQL & Database Query Generator</option>
+                                    <option value="devops">DevOps & CI/CD Automation</option>
+                                    <option value="sentiment">Sentiment & Intent Classifier</option>
+                                    <option value="transcribe">Audio Transcription Engine</option>
+                                    <option value="video">Video Scene & Frame Analyzer</option>
+                                    <option value="quiz">Assessment & Quiz Generator</option>
+                                    <option value="uiux">UI/UX Design Spec Generator</option>
                                 </select>
                             </div>
-                            <button type="button" class="next-btn next-btn-portal">Next Step <i class="fas fa-arrow-right"></i></button>
-                            <span class="back-link back-btn">Go back</span>
-                        </div>
-
-                        <!-- Step 3: Plan Selection -->
-                        <div class="form-step-v4" data-step="3">
-                            <div class="plan-selector">
-                                <label>Select Access Tier</label>
-                                <div class="plan-options">
-                                    <label class="plan-option">
-                                        <input type="radio" name="plan" value="starter_49900">
-                                        <div class="plan-option-box">
-                                            <div class="plan-option-name">Starter</div>
-                                            <div class="plan-option-price">₹499</div>
-                                            <div class="plan-option-api">Limited Req.</div>
-                                        </div>
-                                    </label>
-                                    <label class="plan-option">
-                                        <input type="radio" name="plan" value="growth_249900" checked>
-                                        <div class="plan-option-box">
-                                            <div class="plan-option-name">Growth</div>
-                                            <div class="plan-option-price">₹2,499</div>
-                                            <div class="plan-option-api">Uncapped</div>
-                                        </div>
-                                    </label>
-                                </div>
+                            <div class="field-group">
+                                <label class="field-label">Backend Foundation Model</label>
+                                <select name="model" id="regModelSelect" class="field-input" onchange="updateDynamicRegistrationPrice()">
+                                    <option value="ultra" selected>Shoora-Ultra Max (SOTA 1.5M Context)</option>
+                                    <option value="pro">Shoora-Pro v4 (High-Speed Balanced)</option>
+                                    <option value="lite">Shoora-Lite v2 (Low-Latency Turbo)</option>
+                                    <option value="vision">Shoora-Vision Pro (Multimodal Vision)</option>
+                                    <option value="code">Shoora-Code Specialist (Deep Logic)</option>
+                                </select>
                             </div>
-                            <button type="button" class="next-btn next-btn-portal">Review Selection <i class="fas fa-arrow-right"></i></button>
-                            <span class="back-link back-btn">Go back</span>
+                            <div class="field-group">
+                                <label class="field-label">Accuracy & Fine-Tuning Precision</label>
+                                <select name="accuracy" id="regAccuracySelect" class="field-input" onchange="updateDynamicRegistrationPrice()">
+                                    <option value="1">Level 1: Standard Base Model</option>
+                                    <option value="2">Level 2: Refined Domain Model</option>
+                                    <option value="3" selected>Level 3: Advanced High-Accuracy</option>
+                                    <option value="4">Level 4: Expert Deep-Trained</option>
+                                    <option value="5">Level 5: Sovereign Enterprise (100% Precision)</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">Daily Usage Capacity Limit</label>
+                                <select name="usage" id="regUsageSelect" class="field-input" onchange="updateDynamicRegistrationPrice()">
+                                    <option value="1k">1,000 requests/day</option>
+                                    <option value="10k" selected>10,000 requests/day</option>
+                                    <option value="50k">50,000 requests/day</option>
+                                    <option value="250k">250,000 requests/day</option>
+                                    <option value="unlimited">Unlimited Enterprise (Uncapped)</option>
+                                </select>
+                            </div>
+
+                            <div style="background: rgba(26, 115, 232, 0.06); padding: 16px; border-radius: 12px; border: 1px solid rgba(26, 115, 232, 0.2); margin: 20px 0; text-align: center;">
+                                <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Calculated API Key Price</div>
+                                <div id="regCalculatedPriceDisplay" style="font-size: 2rem; font-weight: 700; color: #1a73e8; margin-top: 4px;">₹6,907</div>
+                                <div id="summaryStockBadge" style="margin-top: 8px; font-size: 0.85rem;"></div>
+                            </div>
+
+                            <button type="button" id="btnStep1Next" class="next-btn next-btn-portal">Review & Activate <i class="fas fa-arrow-right"></i></button>
                         </div>
 
-                        <!-- Step 4: Checkout -->
-                        <div class="form-step-v4" data-step="4">
+                        <!-- Step 2: Checkout & Key Activation -->
+                        <div class="form-step-v4" data-step="2">
                             <div class="order-summary">
                                 <div class="order-row">
-                                    <span class="label">Plan:</span>
-                                    <span class="value" id="summaryPlan">Growth</span>
+                                    <span class="label">Account Email:</span>
+                                    <span class="value" id="summaryUserEmail" style="color: #1a73e8; font-weight: 600;">user@email.com</span>
                                 </div>
                                 <div class="order-row">
-                                    <span class="label">License:</span>
-                                    <span class="value">Lifetime</span>
+                                    <span class="label">AI Agent Task:</span>
+                                    <span class="value" id="summaryAgent">Shoora Omni</span>
+                                </div>
+                                <div class="order-row">
+                                    <span class="label">Foundation Model:</span>
+                                    <span class="value" id="summaryModel">Shoora-Ultra Max</span>
+                                </div>
+                                <div class="order-row">
+                                    <span class="label">Precision Level:</span>
+                                    <span class="value" id="summaryAccuracy">Level 3</span>
+                                </div>
+                                <div class="order-row">
+                                    <span class="label">Daily Capacity:</span>
+                                    <span class="value" id="summaryUsage">10k req/day</span>
                                 </div>
                                 <div class="order-row order-total">
-                                    <span class="label">Total:</span>
-                                    <span class="value" id="summaryAmount">₹2,499</span>
+                                    <span class="label">Total Price:</span>
+                                    <span class="value" id="summaryAmount">₹6,907</span>
                                 </div>
                             </div>
                             
-                            <p id="paymentStatus" style="font-size: 0.8rem; color: #666; margin-bottom: 16px; text-align: center;">Secure connection established. Ready to pay.</p>
+                            <p id="paymentStatus" style="font-size: 0.8rem; color: #666; margin-bottom: 16px; text-align: center;">Key will be bound to your account and accessible in your Dashboard.</p>
                             <button type="button" id="payBtn" class="pay-btn">
-                                <i class="fas fa-lock"></i> Pay Securely
+                                <i class="fas fa-lock"></i> Pay & Activate API Key
                             </button>
-                            <span class="back-link back-btn">Change Plan</span>
+                            <span class="back-link back-btn">Change Configuration</span>
                         </div>
                     </form>
                 </div>
 
                 <div class="card-footer-note">
-                    <span><i class="fas fa-shield-check"></i> SSL Secure</span>
+                    <span><i class="fas fa-shield-check"></i> AES-256 Encrypted</span>
                     <span><i class="fas fa-credit-card"></i> PCI Compliant</span>
                 </div>
             </div>
@@ -194,16 +234,85 @@
 
     <!-- Success Modal -->
     <div id="successModal" class="modal-v4">
-        <div class="modal-card-v4">
-            <div style="font-size: 4rem; color: #4ade80; margin-bottom: 24px;"><i class="fas fa-check-circle"></i></div>
-            <h2>API Activation Successful</h2>
-            <p>Your unique API key has been generated and encrypted.</p>
-            <div style="background: #f4f7ff; padding: 20px; border-radius: 12px; margin: 24px 0; font-family: monospace; font-size: 1.1rem; border: 1px dashed #1a73e8;">
-                <code id="apiKeyDisplay">sk_live_...</code>
+        <div class="modal-card-v4" style="max-width: 520px; border-radius: 28px; padding: 40px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.25); border: 1.5px solid #e2e8f0; background: #fff;">
+            <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 20px;">
+                <i class="fas fa-check"></i>
             </div>
-            <button onclick="window.location.href='curriculum.html'" class="btn-primary" style="width: 100%;">View Documentation</button>
+            
+            <h2 style="font-size: 1.7rem; font-weight: 700; color: #0f172a; margin: 0;">API Key Activated & Bound</h2>
+            <p style="color: #64748b; font-size: 0.95rem; margin-top: 8px;">Your key has been encrypted (AES-256) and linked to your account.</p>
+
+            <!-- Config summary pills -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 18px; margin: 20px 0; text-align: left; font-size: 0.88rem; color: #334155; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">AI Agent Task:</span>
+                    <strong id="modalAgentName" style="color: #0f172a;">Shoora Omni-Generalist</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">Account Owner:</span>
+                    <strong id="modalUserEmail" style="color: #1a73e8;">Your Account</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">Security Status:</span>
+                    <strong style="color: #10b981;"><i class="fas fa-shield-halved"></i> Cloud Vault Bound</strong>
+                </div>
+            </div>
+
+            <!-- Key Display Box with Masking & Copy -->
+            <div style="background: #0f172a; color: #38bdf8; padding: 16px 18px; border-radius: 14px; font-family: monospace; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; word-break: break-all; border: 1px solid #1e293b;">
+                <span id="apiKeyDisplay" data-full="" data-masked="" style="letter-spacing: 1px;">sk_live_...</span>
+                <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px; flex-shrink: 0;">
+                    <button type="button" onclick="toggleModalKeyEye()" style="background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; cursor: pointer;" title="Toggle Show/Hide Key">
+                        <i id="modalEyeIcon" class="fas fa-eye"></i>
+                    </button>
+                    <button type="button" onclick="copyModalKey(this)" style="background: #1a73e8; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem;" title="Copy to Clipboard">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="dashboard.html" class="btn-primary" style="background: #1a73e8; padding: 14px; border-radius: 12px; font-size: 0.95rem; display: block; text-align: center; text-decoration: none;">Go to My Account Dashboard <i class="fas fa-arrow-right" style="margin-left: 6px;"></i></a>
+                <a href="curriculum.html" style="color: #64748b; font-size: 0.88rem; text-decoration: none; padding: 8px; font-weight: 500;">View Integration Documentation</a>
+            </div>
         </div>
     </div>
+
+    <script>
+        function toggleModalKeyEye() {
+            const el = document.getElementById('apiKeyDisplay');
+            const icon = document.getElementById('modalEyeIcon');
+            if (!el || !icon) return;
+            const full = el.getAttribute('data-full');
+            const masked = el.getAttribute('data-masked');
+
+            if (el.textContent.trim() === masked.trim()) {
+                el.textContent = full;
+                icon.className = 'fas fa-eye-slash';
+                icon.style.color = '#ef4444';
+            } else {
+                el.textContent = masked;
+                icon.className = 'fas fa-eye';
+                icon.style.color = '#94a3b8';
+            }
+        }
+
+        function copyModalKey(btn) {
+            const el = document.getElementById('apiKeyDisplay');
+            if (!el) return;
+            const full = el.getAttribute('data-full') || el.textContent;
+            navigator.clipboard.writeText(full).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.background = '#1a73e8';
+                }, 2000);
+            });
+        }
+    </script>
 
     <footer class="footer-v10">
         <div class="container footer-grid">

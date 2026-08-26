@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. User Profiles & Keys Vault (Strict Per-User Ownership)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
+      
+      match /keys/{keyId} {
+        allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
+      }
+    }
+    
+    // 2. Admin Key Inventory Vault
+    match /inventory_vault/{keyId} {
+      allow read: if true; // Public read for real-time stock availability matrix on status.html
+      allow create, delete: if request.auth != null && request.auth.token.admin == true;
+      allow update: if request.auth != null; // Allows key assignment upon successful purchase
+    }
+    
+    // 3. Purchase Order Ledger
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (resource.data.uid == request.auth.uid || request.auth.token.admin == true);
+      allow create: if request.auth != null;
+    }
+
+    // 4. Security Audit Logs
+    match /audit_logs/{logId} {
+      allow read, create: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // 5. Global System Settings
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}

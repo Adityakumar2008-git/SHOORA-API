@@ -18,11 +18,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -30,7 +35,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -49,23 +54,23 @@
         <div class="container">
             <div class="bento-grid">
                 <div class="bento-item large reveal-item">
-                    <h3>01. Data Integrity</h3>
-                    <p style="margin-top: 20px;">Your API usage and organizational data are encrypted using military-grade AES-256 protocols. We ensure that your information is only accessible by authorized systems for billing and monitoring.</p>
+                    <h3>01. Data Integrity & Key Vault Security</h3>
+                    <p style="margin-top: 20px;">Your API usage, custom key allocations from Admin Vaults, and agent payloads are encrypted using military-grade AES-256 protocols. We enforce strict zero-data retention policies for Level 5 Sovereign enterprise workloads.</p>
                 </div>
                 <div class="bento-item small reveal-item">
-                    <h3>Security</h3>
-                    <p style="margin-top: 20px;">Continuous monitoring and zero-trust architecture protect the portal from unauthorized access.</p>
+                    <h3>Vault Security</h3>
+                    <p style="margin-top: 20px;">Passcode-authenticated Admin Vaults and zero-trust architecture protect API key allocations from unauthorized access.</p>
                 </div>
             </div>
 
             <div class="bento-grid" style="margin-top: 32px;">
                 <div class="bento-item small reveal-item">
                     <h3>AI Ethics</h3>
-                    <p style="margin-top: 20px;">We do not use your data to train external third-party models without explicit anonymization.</p>
+                    <p style="margin-top: 20px;">We do not use customer inputs or agent prompt execution payloads to train foundation base models.</p>
                 </div>
                 <div class="bento-item large reveal-item">
-                    <h3>02. Developer Rights</h3>
-                    <p style="margin-top: 20px;">As a developer, you have the absolute right to request data erasure or rectification at any point. Your API logs are stored for a maximum period of 30 days for operational auditing purposes.</p>
+                    <h3>02. Developer Rights & Audit Transparency</h3>
+                    <p style="margin-top: 20px;">As a developer, you have the absolute right to request complete data erasure or key revocation at any point. Your transaction ledgers and payment receipts are saved securely for operational auditing.</p>
                 </div>
             </div>
         </div>
@@ -109,6 +114,7 @@
         </div>
     </footer>
 
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -18,11 +18,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -30,7 +35,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html" class="active"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -61,10 +66,11 @@
                     <div style="margin-bottom: 24px;">
                         <label class="label-v10">Subject</label>
                         <select name="type" class="input-v10" required>
-                            <option value="Admission">API Access</option>
-                            <option value="Curriculum">Documentation Help</option>
-                            <option value="Payment">Billing Issue</option>
-                            <option value="Other">Other Integration</option>
+                            <option value="Admission">Custom API Key & Vault Assistance</option>
+                            <option value="Curriculum">Dynamic Pricing Matrix Inquiry</option>
+                            <option value="Payment">Billing & Payment Verification</option>
+                            <option value="Agent">Agent Integration & Fine-Tuning Help</option>
+                            <option value="Other">Dedicated Enterprise SLA Request</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 32px;">
@@ -116,6 +122,7 @@
         </div>
     </footer>
 
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

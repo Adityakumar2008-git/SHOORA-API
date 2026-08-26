@@ -17,11 +17,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -29,7 +34,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -68,9 +73,9 @@
                     
                     <!-- Authentication -->
                     <div id="authentication" class="docs-section reveal-item">
-                        <h2>Authentication</h2>
-                        <p>The SHOORA AI API uses API keys for authentication. Visit your <a href="register.html">dashboard</a> to retrieve the API key you'll use in your requests.</p>
-                        <p>Remember that your API key is a secret! Do not share it with others or expose it in any client-side code (browsers, apps).</p>
+                        <h2>Authentication & Vault Keys</h2>
+                        <p>The SHOORA AI API authenticates requests using API keys issued directly from your configured <a href="pricing.html">Dynamic Pricing Matrix</a> or allocated via the Enterprise Inventory Key Vault.</p>
+                        <p>Pass your key in the <code>Authorization</code> HTTP header. Vault keys map to your configured Agent type, Foundation Model, and Precision Accuracy Level.</p>
                         
                         <div class="terminal-v10">
                             <div class="terminal-header">
@@ -79,40 +84,50 @@
                                 </div>
                                 <span class="lang-label">bash</span>
                             </div>
-                            <div class="terminal-body"><span class="keyword">curl</span> https://api.shooraai.com/v1/models \
-  -H <span class="string">"Authorization: Bearer $SHOORA_API_KEY"</span></div>
+                            <div class="terminal-body"><span class="keyword">curl</span> https://api.shooraai.tech/v1/models \
+  -H <span class="string">"Authorization: Bearer sk_live_your_vault_key"</span></div>
                         </div>
                     </div>
 
                     <!-- Rate Limits -->
                     <div id="rate-limits" class="docs-section reveal-item">
-                        <h2>Rate Limits</h2>
-                        <p>To ensure platform stability, we enforce rate limits at the organizational and user levels. The limits depend on your current <a href="pricing.html">pricing tier</a>.</p>
+                        <h2>Rate Limits & Daily Usage Tiers</h2>
+                        <p>Rate limits are determined dynamically by your selected Daily Capacity Tier (1k to Unlimited Enterprise). Headers specify remaining quota.</p>
                         
                         <div class="table-container">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Tier</th>
-                                        <th>Requests per Minute (RPM)</th>
-                                        <th>Tokens per Minute (TPM)</th>
+                                        <th>Configured Usage Tier</th>
+                                        <th>Daily Request Limit</th>
+                                        <th>Burst Limit (RPM)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="tier-name">Developer</td>
-                                        <td>500</td>
-                                        <td>100,000</td>
+                                        <td class="tier-name">1k Tier</td>
+                                        <td>1,000 req/day</td>
+                                        <td>60 RPM</td>
                                     </tr>
                                     <tr>
-                                        <td class="tier-name">Startup</td>
-                                        <td>5,000</td>
-                                        <td>2,000,000</td>
+                                        <td class="tier-name">10k Tier</td>
+                                        <td>10,000 req/day</td>
+                                        <td>600 RPM</td>
                                     </tr>
                                     <tr>
-                                        <td class="tier-name">Enterprise</td>
-                                        <td>Custom</td>
-                                        <td>Custom</td>
+                                        <td class="tier-name">50k Tier</td>
+                                        <td>50,000 req/day</td>
+                                        <td>3,000 RPM</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tier-name">250k Tier</td>
+                                        <td>250,000 req/day</td>
+                                        <td>15,000 RPM</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tier-name">Unlimited Enterprise</td>
+                                        <td>Uncapped Unlimited</td>
+                                        <td>Uncapped Dedicated Cluster</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -123,13 +138,13 @@
                     <div id="endpoints" class="docs-section reveal-item">
                         <h2>Endpoints</h2>
                         
-                        <!-- Chat Completions -->
+                        <!-- Agent Execution -->
                         <div id="chat-completions" class="endpoint-block">
                             <h3 class="endpoint-title">
                                 <span class="method">POST</span> 
-                                /v1/chat/completions
+                                /v1/agent/execute
                             </h3>
-                            <p>Creates a model response for the given chat conversation.</p>
+                            <p>Executes a specialized AI Agent (Code Architect, Legal Summarizer, Medical AI, etc.) with specified model foundation and precision level.</p>
                             
                             <div class="terminal-v10">
                                 <div class="terminal-header">
@@ -138,19 +153,83 @@
                                     </div>
                                     <span class="lang-label">Request Example</span>
                                 </div>
-                                <div class="terminal-body"><span class="keyword">curl</span> https://api.shooraai.com/v1/chat/completions \
+                                <div class="terminal-body"><span class="keyword">curl</span> https://api.shooraai.tech/v1/agent/execute \
   -H <span class="string">"Content-Type: application/json"</span> \
-  -H <span class="string">"Authorization: Bearer $SHOORA_API_KEY"</span> \
+  -H <span class="string">"Authorization: Bearer sk_live_your_vault_key"</span> \
   -d <span class="string">'{
-    "model": "shoora-turbo-v2",
-    "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello!"}
-    ]
+    "agent": "omni-super-agent",
+    "model": "shoora-ultra-max-1.5m",
+    "accuracy_level": 5,
+    "prompt": "Analyze dataset and output structured JSON execution plan."
   }'</span></div>
                             </div>
                         </div>
 
+                        <!-- Embeddings Endpoint -->
+                        <div id="embeddings" class="endpoint-block" style="margin-top: 40px;">
+                            <h3 class="endpoint-title">
+                                <span class="method" style="background: #10b981;">POST</span> 
+                                /v1/embeddings
+                            </h3>
+                            <p>Generate high-dimensional vector embeddings for semantic search, retrieval augmented generation (RAG), and agent memory clusters.</p>
+                            
+                            <div class="terminal-v10">
+                                <div class="terminal-header">
+                                    <div class="terminal-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span class="lang-label">Request Example</span>
+                                </div>
+                                <div class="terminal-body"><span class="keyword">curl</span> https://api.shooraai.tech/v1/embeddings \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -H <span class="string">"Authorization: Bearer sk_live_your_vault_key"</span> \
+  -d <span class="string">'{
+    "model": "shoora-embed-large-v3",
+    "input": "Financial query vector indexing."
+  }'</span></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Error Handling -->
+                    <div id="errors" class="docs-section reveal-item" style="margin-top: 48px;">
+                        <h2>Error Codes & Troubleshooting</h2>
+                        <p>SHOORA AI returns standard HTTP response codes alongside descriptive JSON error payloads to assist with immediate debugging.</p>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Status Code</th>
+                                        <th>Meaning</th>
+                                        <th>Resolution</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code style="font-weight: 700; color: #10b981;">200 OK</code></td>
+                                        <td>Successful execution</td>
+                                        <td>Response payload ready in <code>choices</code> object.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="font-weight: 700; color: #ef4444;">401 Unauthorized</code></td>
+                                        <td>Invalid or Missing Vault Key</td>
+                                        <td>Ensure your Bearer token matches your purchased API key.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="font-weight: 700; color: #f59e0b;">429 Too Many Requests</code></td>
+                                        <td>Daily Capacity Limit Exceeded</td>
+                                        <td>Upgrade your usage tier or configure burst buffer.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code style="font-weight: 700; color: #ef4444;">500 Gateway Error</code></td>
+                                        <td>Internal cluster failover</td>
+                                        <td>Automatic failover engaged. Check <a href="status.html">System Status</a>.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                 </div>
@@ -196,6 +275,7 @@
         </div>
     </footer>
 
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

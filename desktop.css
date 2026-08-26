@@ -72,7 +72,7 @@ h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; letter-spacing: -0.05em; fon
 
 .nav-wrap { display: flex; justify-content: space-between; align-items: center; }
 .brand a { font-size: 1.4rem; color: #000; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-.nav-toggle, .nav-backdrop { display: none !important; }
+.nav-toggle, .nav-backdrop, .nav-mobile-btn, .nav-right-mobile .nav-mobile-btn { display: none !important; }
 
 .nav-links {
     display: flex !important;

@@ -17,11 +17,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -29,7 +34,7 @@
                 <a href="status.html" class="active"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -47,37 +52,63 @@
                 <h3 class="status-category-title">Core API Services</h3>
                 <ul class="status-list">
                     <li>
-                        <span class="service-name">API Gateway</span>
+                        <span class="service-name">Multi-Agent API Gateway (`/v1/agent/execute`)</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                     <li>
-                        <span class="service-name">Text Generation (`/v1/completions`)</span>
+                        <span class="service-name">Shoora Omni-Generalist (Super-Agent Cluster)</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                     <li>
-                        <span class="service-name">Embeddings (`/v1/embeddings`)</span>
+                        <span class="service-name">Code Architect & Refactoring Engine</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                     <li>
-                        <span class="service-name">Vision Analysis (`/v1/vision`)</span>
+                        <span class="service-name">Vision Analyst & Real-Time Voice Synthesis</span>
+                        <span class="service-status operational">Operational</span>
+                    </li>
+                    <li>
+                        <span class="service-name">Level 1-5 Accuracy Fine-Tuning Clusters</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                 </ul>
 
-                <h3 class="status-category-title secondary">Dashboard & Billing</h3>
+                <h3 class="status-category-title secondary">Dashboard & Vault Security</h3>
                 <ul class="status-list">
                     <li>
-                        <span class="service-name">Developer Dashboard</span>
+                        <span class="service-name">Admin Inventory Key Vault</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                     <li>
-                        <span class="service-name">Billing System</span>
+                        <span class="service-name">Dynamic Pricing Engine & Razorpay Fulfillment</span>
                         <span class="service-status operational">Operational</span>
                     </li>
                 </ul>
+
+                <h3 class="status-category-title secondary" style="margin-top: 36px;">
+                    <i class="fas fa-boxes-stacked" style="color: var(--primary); margin-right: 8px;"></i>
+                    Real-Time API Configuration Availability & Stock
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">Live inventory pool synced directly with the SHOORA Admin Key Vault. Configurations with available stock are ready for instant checkout.</p>
+
+                <div class="table-container" style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fff; margin-bottom: 24px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid var(--border);">
+                                <th style="padding: 12px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Agent Task Category</th>
+                                <th style="padding: 12px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Foundation Model</th>
+                                <th style="padding: 12px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Stock In Vault</th>
+                                <th style="padding: 12px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary);">Live Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statusStockMatrixBody">
+                            <!-- Populated dynamically via script.js -->
+                        </tbody>
+                    </table>
+                </div>
                 
                 <div class="status-footer-note">
-                    Last updated: Just now. Guaranteed 99.99% uptime across all regions.
+                    Last updated: Just now. Real-time availability synchronized with Admin Key Inventory Vault.
                 </div>
             </div>
         </div>
@@ -120,6 +151,7 @@
             </div>
         </div>
     </footer>
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

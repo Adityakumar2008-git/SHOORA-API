@@ -17,11 +17,16 @@
                     <span>SHOORA AI</span>
                 </a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
+            <div class="nav-right-mobile">
+                <a href="login.html" id="navMobileActionBtn" class="nav-mobile-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+                </a>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation" aria-expanded="false">
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                    <span class="hamburger-bar"></span>
+                </button>
+            </div>
             <div class="nav-links" id="navLinks">
                 <a href="use-cases.html"><i class="fa-solid fa-layer-group"></i> <span>Use Cases</span></a>
                 <a href="pricing.html"><i class="fa-solid fa-tag"></i> <span>Pricing</span></a>
@@ -29,7 +34,7 @@
                 <a href="status.html"><i class="fa-solid fa-signal"></i> <span>Status</span></a>
                 <a href="about.html" class="active"><i class="fa-solid fa-circle-info"></i> <span>About</span></a>
                 <a href="support.html"><i class="fa-solid fa-headset"></i> <span>Support</span></a>
-                <a href="register.html" class="nav-cta"><i class="fa-solid fa-key"></i> <span>Get API Key</span></a>
+                <a href="login.html" class="nav-cta"><i class="fa-solid fa-right-to-bracket"></i> <span>Login / Sign Up</span></a>
             </div>
         </div>
     </nav>
@@ -37,9 +42,9 @@
     <header class="about-hero">
         <div class="container" style="display: flex; align-items: center; justify-content: center; text-align: center;">
             <div class="reveal-item">
-                <span class="badge-v10">Our Mission</span>
-                <h1>Intelligence <br>for Everyone</h1>
-                <p style="margin-top: 32px; font-size: 1.9rem;">We are a team of researchers and engineers democratizing access to state-of-the-art AI models.</p>
+                <span class="badge-v10">Multi-Agent Infrastructure</span>
+                <h1>Intelligence <br>at Precision Scale</h1>
+                <p style="margin-top: 32px; font-size: 1.9rem;">We are a team of researchers and systems engineers powering 20+ specialized AI agents and high-throughput foundation models.</p>
             </div>
         </div>
     </header>
@@ -48,12 +53,12 @@
         <div class="container">
             <div class="bento-grid">
                 <div class="bento-item large reveal-item">
-                    <h3>Pioneering Research</h3>
-                    <p style="margin-top: 24px;">At SHOORA AI Tech, our dedicated research teams work at the cutting edge of artificial intelligence. We focus on optimizing transformer architectures, reducing latency, and scaling infrastructure so that you can build the impossible.</p>
+                    <h3>Pioneering Multi-Agent Research</h3>
+                    <p style="margin-top: 24px;">At SHOORA AI, our dedicated engineering teams optimize transformer architectures across 5 core foundation models (Shoora-Ultra 1.5M, Pro v4, Vision Pro & Code Specialist) and 5 fine-tuning precision levels to deliver tailored intelligence for high-scale enterprise applications.</p>
                 </div>
                 <div class="bento-item small reveal-item">
-                    <h3>Global Scale</h3>
-                    <p style="margin-top: 24px;">Serving billions of API requests daily across 50+ global edge locations.</p>
+                    <h3>Global Edge Scale</h3>
+                    <p style="margin-top: 24px;">Serving billions of multi-agent API requests daily across 50+ global low-latency edge clusters.</p>
                 </div>
             </div>
         </div>
@@ -63,12 +68,12 @@
         <div class="container">
             <div class="bento-grid">
                 <div class="bento-item large reveal-item">
-                    <h3>Developer-First Approach</h3>
-                    <p style="margin-top: 24px;">We believe that the best infrastructure is invisible. Our APIs are designed to be integrated in minutes, not months. We provide comprehensive SDKs, beautiful documentation, and 24/7 technical support for our enterprise partners.</p>
+                    <h3>Developer-First & Vault Security</h3>
+                    <p style="margin-top: 24px;">We believe in transparent, dynamic API pricing and instant activation. Our platform features an interactive cost calculator, instant key allocation from secure Admin Key Inventory Vaults, and 24/7 technical support for global engineering teams.</p>
                 </div>
                 <div class="bento-item small reveal-item">
-                    <h3>Security First</h3>
-                    <p style="margin-top: 24px;">SOC2 Type II compliant with end-to-end encryption for all enterprise data.</p>
+                    <h3>Vault & SOC2 Security</h3>
+                    <p style="margin-top: 24px;">SOC2 Type II compliant with AES-256 encrypted key vaults and zero-data retention policies for Level 5 Sovereign enterprise workloads.</p>
                 </div>
             </div>
 
@@ -117,6 +122,7 @@
             </div>
         </div>
     </footer>
+    <script type="module" src="js/firebase-config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
