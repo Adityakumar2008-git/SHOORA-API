@@ -820,27 +820,7 @@ const SHOORA_PRICE_MATRIX = {
 /**
  * SHOORA AI Inventory Stock Engine & Availability Gatekeeper
  */
-function initDefaultStockPoolIfEmpty() {
-    const existing = localStorage.getItem('shoora_admin_vault');
-    if (!existing || JSON.parse(existing).length === 0) {
-        const seedKeys = [
-            { id: 'key_omni_01', agent: 'omni', model: 'ultra', accuracy: '5', usageLimit: '50k', key: 'sk_live_shoora_e9f8a7b6c5d4e3f2a1b0c9d8', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_omni_02', agent: 'omni', model: 'pro', accuracy: '3', usageLimit: '10k', key: 'sk_live_shoora_8a7b6c5d4e3f2a1b0c9d8e7f', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_code_01', agent: 'code', model: 'code', accuracy: '4', usageLimit: '50k', key: 'sk_live_shoora_7b6c5d4e3f2a1b0c9d8e7f6a', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_code_02', agent: 'code', model: 'pro', accuracy: '3', usageLimit: '10k', key: 'sk_live_shoora_6c5d4e3f2a1b0c9d8e7f6a5b', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_vision_01', agent: 'vision', model: 'vision', accuracy: '4', usageLimit: '10k', key: 'sk_live_shoora_5d4e3f2a1b0c9d8e7f6a5b4c', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_legal_01', agent: 'legal', model: 'ultra', accuracy: '5', usageLimit: '50k', key: 'sk_live_shoora_4e3f2a1b0c9d8e7f6a5b4c3d', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_medical_01', agent: 'medical', model: 'ultra', accuracy: '5', usageLimit: '50k', key: 'sk_live_shoora_3f2a1b0c9d8e7f6a5b4c3d2e', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_quant_01', agent: 'quant', model: 'pro', accuracy: '4', usageLimit: '50k', key: 'sk_live_shoora_2a1b0c9d8e7f6a5b4c3d2e1f', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_cyber_01', agent: 'cyber', model: 'code', accuracy: '4', usageLimit: '10k', key: 'sk_live_shoora_1b0c9d8e7f6a5b4c3d2e1f0a', status: 'available', addedAt: new Date().toISOString() },
-            { id: 'key_voice_01', agent: 'voice', model: 'pro', accuracy: '3', usageLimit: '10k', key: 'sk_live_shoora_0c9d8e7f6a5b4c3d2e1f0a9b', status: 'available', addedAt: new Date().toISOString() }
-        ];
-        localStorage.setItem('shoora_admin_vault', JSON.stringify(seedKeys));
-    }
-}
-
 function getVaultInventoryList() {
-    initDefaultStockPoolIfEmpty();
     const raw = localStorage.getItem('shoora_admin_vault');
     try {
         return raw ? JSON.parse(raw) : [];
@@ -1012,7 +992,6 @@ function syncConfigFromQueryParams() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initDefaultStockPoolIfEmpty();
     syncConfigFromQueryParams();
     updateDynamicRegistrationPrice();
     initCheckoutUserBadge();

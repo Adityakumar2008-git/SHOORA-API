@@ -975,7 +975,8 @@
                             <h2 class="sec-panel-title" style="margin-bottom: 18px;"><i class="fas fa-database" style="color: #38bdf8;"></i> Database & Real-Time Sync Controls</h2>
                             <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap;">
                                 <button type="button" onclick="window.refreshRealData();" class="sec-btn-action" style="background: #2563eb;"><i class="fas fa-sync"></i> Re-Sync All Real Firestore Data</button>
-                                <button type="button" onclick="window.purgeLegacyDummyCache();" class="sec-btn-action sec-btn-secondary" style="color: #f87171;"><i class="fas fa-broom"></i> Purge Legacy Dummy Cache</button>
+                                <button type="button" onclick="window.clearVaultStockToZero();" class="sec-btn-action sec-btn-secondary" style="color: #fb923c;"><i class="fas fa-trash-can"></i> Wipe Vault to 0 Stock</button>
+                                <button type="button" onclick="window.purgeLegacyDummyCache();" class="sec-btn-action sec-btn-secondary" style="color: #f87171;"><i class="fas fa-broom"></i> Purge All Dummy Cache</button>
                             </div>
 
                             <h2 class="sec-panel-title" style="margin-bottom: 18px;"><i class="fas fa-key" style="color: var(--sec-warning);"></i> Rotate Administrative Master Passcode</h2>
@@ -1515,9 +1516,20 @@
                 localStorage.removeItem('shoora_all_purchased_keys');
                 localStorage.removeItem('shoora_all_orders');
                 localStorage.removeItem('shoora_last_transaction');
+                localStorage.removeItem('shoora_admin_vault');
+                adminData.vault = [];
                 await window.loadAllData();
-                logAuditEvent('CACHE_PURGE', 'Purged legacy cached data');
-                showSecToast("Legacy cache purged. Clean database loaded!", "fa-broom");
+                logAuditEvent('CACHE_PURGE', 'Purged legacy cached data and reset vault to 0');
+                showSecToast("Legacy cache purged. Clean 0-state database loaded!", "fa-broom");
+            }
+        };
+
+        window.clearVaultStockToZero = function() {
+            if (confirm("Are you sure you want to remove ALL keys from the vault and reset stock to 0?")) {
+                adminData.vault = [];
+                saveVault();
+                logAuditEvent('VAULT_WIPED', 'Admin wiped all inventory stock to 0');
+                showSecToast("Vault inventory reset to 0 stock!", "fa-trash", "#ef4444");
             }
         };
 
