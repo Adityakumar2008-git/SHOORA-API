@@ -162,6 +162,17 @@ function updateGlobalNavbarAuthUI(user) {
         if (userMenu) userMenu.remove();
     }
 
+    // Direct Register Page Auth Notice Control
+    const authNotice = document.getElementById('checkoutAuthNotice');
+    const summaryUserEmail = document.getElementById('summaryUserEmail');
+    if (user && user.email) {
+        if (authNotice) authNotice.style.display = 'none';
+        if (summaryUserEmail) summaryUserEmail.textContent = user.email;
+    } else {
+        if (authNotice) authNotice.style.display = 'flex';
+        if (summaryUserEmail) summaryUserEmail.innerHTML = '<span style="color: #ef4444;">Login Required (<a href="login.html?redirect=register.html" style="color: #1a73e8; text-decoration: underline;">Sign In</a>)</span>';
+    }
+
     // Immediately trigger checkout badge update if on register page
     if (typeof window.updateCheckoutUserUI === 'function') {
         window.updateCheckoutUserUI(user);

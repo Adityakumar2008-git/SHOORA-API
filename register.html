@@ -137,13 +137,20 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Auth State Banner -->
-                    <div id="checkoutAuthNotice" style="background: #fef2f2; border: 1px solid #fecaca; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <!-- Auth State Banner (Only shown when NOT logged in) -->
+                    <div id="checkoutAuthNotice" style="display: none; background: #fef2f2; border: 1px solid #fecaca; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 0.88rem; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                         <div>
                             <i class="fas fa-user-circle" style="color: #ef4444; margin-right: 6px;"></i> Account: <strong id="checkoutUserBadge"><span style="color: #ef4444;">Not Logged In</span> — <a href="login.html?redirect=register.html" style="color: #1a73e8; font-weight: 600; text-decoration: underline;">Sign In First</a></strong>
                         </div>
                         <span id="checkoutAuthStatus"><span style="color: #ef4444; font-weight: 700; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); padding: 4px 10px; border-radius: 20px;"><i class="fas fa-circle-xmark"></i> Login Required</span></span>
                     </div>
+                    <script>
+                        // Instant pre-render check
+                        if (!localStorage.getItem('shoora_logged_in_user_email')) {
+                            const el = document.getElementById('checkoutAuthNotice');
+                            if (el) el.style.display = 'flex';
+                        }
+                    </script>
 
                     <form id="registrationForm">
                         <!-- Step 1: API & Agent Configuration -->
