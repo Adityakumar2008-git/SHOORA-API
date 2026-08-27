@@ -1434,11 +1434,58 @@
         window.toggleUserKeyStatus = function(apiKey) {
             const k = adminData.userKeys.find(item => item.apiKey === apiKey);
             if (k) {
-                k.status = k.status === 'revoked' ? 'active' : 'revoked';
+                k.status = (k.status === 'REVOKED' || k.status === 'revoked') ? 'ACTIVE' : 'REVOKED';
+                
+                // 1. Sync to global keys list
                 localStorage.setItem('shoora_all_purchased_keys', JSON.stringify(adminData.userKeys));
+                
+                // 2. Sync to Email-scoped cache
+                const email = (k.email || k.userEmail || '').toLowerCase();
+                if (email) {
+                    try {
+                        const emailList = JSON.parse(localStorage.getItem('shoora_user_keys_' + email) || '[]');
+                        emailList.forEach(item => {
+                            if (item.apiKey === apiKey) item.status = k.status;
+                        });
+                        localStorage.setItem('shoora_user_keys_' + email, JSON.stringify(emailList));
+                    } catch(e) {}
+                }
+
+                // 3. Sync to UID-scoped cache
+                if (k.uid) {
+                    try {
+                        const uidList = JSON.parse(localStorage.getItem('shoora_user_keys_' + k.uid) || '[]');
+                        uidList.forEach(item => {
+                            if (item.apiKey === apiKey) item.status = k.status;
+                        });
+                        localStorage.setItem('shoora_user_keys_' + k.uid, JSON.stringify(uidList));
+                    } catch(e) {}
+                }
+
+                // 4. Sync to last transaction cache
+                try {
+                    const lastTx = JSON.parse(localStorage.getItem('shoora_last_transaction') || '{}');
+                    if (lastTx.apiKey === apiKey) {
+                        lastTx.status = k.status;
+                        localStorage.setItem('shoora_last_transaction', JSON.stringify(lastTx));
+                    }
+                } catch(e) {}
+
+                // 5. Cloud Firestore Synchronization
+                if (window.db && window.doc && window.setDoc) {
+                    try {
+                        if (k.orderId) {
+                            window.setDoc(window.doc(window.db, "orders", k.orderId), { status: k.status }, { merge: true }).catch(() => {});
+                        }
+                        if (k.uid && (k.keyId || k.id)) {
+                            window.setDoc(window.doc(window.db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true }).catch(() => {});
+                        }
+                    } catch(e) {}
+                }
+
                 renderUserKeysTable();
                 logAuditEvent('USER_KEY_TOGGLE', `Toggled user key ${apiKey} to ${k.status}`);
-                showSecToast(`Customer Key status set to ${k.status.toUpperCase()}`);
+                showSecToast(`Customer Key status set to ${k.status}`);
             }
         };
 

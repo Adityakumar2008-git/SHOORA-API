@@ -1002,8 +1002,13 @@
                 const quotaLimitNum = parseDailyLimit(k.usage);
                 const quotaDisplay = quotaLimitNum.toLocaleString('en-IN') + ' req/day';
 
+                const isRevoked = (k.status && (k.status === 'REVOKED' || k.status === 'revoked'));
+                const statusBadge = isRevoked ? 
+                    `<span class="key-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fas fa-circle-xmark" style="margin-right: 4px;"></i> Revoked</span>` :
+                    `<span class="key-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981;"><i class="fas fa-circle-check" style="margin-right: 4px;"></i> Active</span>`;
+
                 return `
-                <div class="key-card" id="${cardId}" data-apikey="${fullKey}">
+                <div class="key-card" id="${cardId}" data-apikey="${fullKey}" style="${isRevoked ? 'border: 1px solid rgba(239, 68, 68, 0.4); background: #fffaf0;' : ''}">
                     
                     <!-- Card Header -->
                     <div class="key-card-header">
@@ -1012,7 +1017,7 @@
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <span class="key-model-badge"><i class="fas fa-microchip" style="margin-right: 4px;"></i> ${modelName.split('(')[0].trim()}</span>
-                            <span class="key-badge"><i class="fas fa-circle-check" style="margin-right: 4px;"></i> Active</span>
+                            ${statusBadge}
                         </div>
                     </div>
 
@@ -1020,7 +1025,7 @@
                     <div class="key-code-box">
                         <div style="display: flex; align-items: center; gap: 10px; word-break: break-all;">
                             <span style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Secret Key:</span>
-                            <span id="${elementId}" data-full="${fullKey}" data-masked="${maskedKey}" style="letter-spacing: 1px; font-weight: 600; font-family: monospace; font-size: 0.95rem;">
+                            <span id="${elementId}" data-full="${fullKey}" data-masked="${maskedKey}" style="letter-spacing: 1px; font-weight: 600; font-family: monospace; font-size: 0.95rem; ${isRevoked ? 'text-decoration: line-through; color: #f87171;' : ''}">
                                 ${maskedKey}
                             </span>
                         </div>
@@ -1073,21 +1078,21 @@
                             <div class="per-key-metrics-grid">
                                 <div class="per-key-stat-card">
                                     <div class="pstat-label">Daily Capacity</div>
-                                    <div class="pstat-val">0 / ${quotaLimitNum.toLocaleString('en-IN')}</div>
-                                    <div class="quota-meter-bar"><div class="quota-meter-fill" style="width: 0%;"></div></div>
-                                    <div class="pstat-sub" style="color: #64748b;">0.0% used</div>
+                                    <div class="pstat-val">${isRevoked ? '0 / 0' : ('0 / ' + quotaLimitNum.toLocaleString('en-IN'))}</div>
+                                    <div class="quota-meter-bar"><div class="quota-meter-fill" style="width: ${isRevoked ? '100%' : '0%'}; ${isRevoked ? 'background: #ef4444;' : ''}"></div></div>
+                                    <div class="pstat-sub" style="color: ${isRevoked ? '#ef4444' : '#64748b'};">${isRevoked ? 'REVOKED' : '0.0% used'}</div>
                                 </div>
                                 
                                 <div class="per-key-stat-card">
                                     <div class="pstat-label">Inference Speed</div>
-                                    <div class="pstat-val" style="color: #f59e0b;">${latencyStr}</div>
-                                    <div class="pstat-sub" style="color: #10b981;"><i class="fas fa-bolt"></i> Low Latency</div>
+                                    <div class="pstat-val" style="color: ${isRevoked ? '#ef4444' : '#f59e0b'}; font-size: ${isRevoked ? '0.95rem' : '1.15rem'};">${isRevoked ? 'BLOCKED' : latencyStr}</div>
+                                    <div class="pstat-sub" style="color: ${isRevoked ? '#ef4444' : '#10b981'};"><i class="fas ${isRevoked ? 'fa-ban' : 'fa-bolt'}"></i> ${isRevoked ? 'Access Cut' : 'Low Latency'}</div>
                                 </div>
 
                                 <div class="per-key-stat-card">
                                     <div class="pstat-label">SLA Health</div>
-                                    <div class="pstat-val" style="color: #10b981;">99.99%</div>
-                                    <div class="pstat-sub" style="color: #10b981;"><i class="fas fa-shield-alt"></i> Gateway Ready</div>
+                                    <div class="pstat-val" style="color: ${isRevoked ? '#ef4444' : '#10b981'}; font-size: ${isRevoked ? '0.95rem' : '1.15rem'};">${isRevoked ? 'REVOKED' : '99.99%'}</div>
+                                    <div class="pstat-sub" style="color: ${isRevoked ? '#ef4444' : '#10b981'};"><i class="fas ${isRevoked ? 'fa-triangle-exclamation' : 'fa-shield-alt'}"></i> ${isRevoked ? 'Gateway Locked' : 'Gateway Ready'}</div>
                                 </div>
                             </div>
 
