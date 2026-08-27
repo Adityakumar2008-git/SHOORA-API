@@ -1503,11 +1503,36 @@
         };
 
         window.toggleUserAccount = function(email) {
-            const u = adminData.users.find(item => item.email === email);
+            const cleanEmail = (email || '').toLowerCase().trim();
+            const u = adminData.users.find(item => item.email.toLowerCase() === cleanEmail);
             if (u) {
                 u.status = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+                
+                // 1. Maintain dedicated shoora_suspended_users registry
+                let suspendedList = [];
+                try {
+                    suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+                } catch(e) {}
+
+                if (u.status === 'SUSPENDED') {
+                    if (!suspendedList.includes(cleanEmail)) suspendedList.push(cleanEmail);
+                } else {
+                    suspendedList = suspendedList.filter(x => x !== cleanEmail);
+                }
+                localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedList));
+
+                // 2. Save user status in accounts cache
+                localStorage.setItem('shoora_admin_users', JSON.stringify(adminData.users));
+
+                // 3. Firestore Sync (if matching user doc exists)
+                if (window.db && window.doc && window.setDoc && u.uid) {
+                    try {
+                        window.setDoc(window.doc(window.db, "users", u.uid), { status: u.status }, { merge: true }).catch(() => {});
+                    } catch(e) {}
+                }
+
                 renderAccountsTable();
-                logAuditEvent('USER_ACCOUNT_TOGGLE', `Customer ${email} status set to ${u.status}`);
+                logAuditEvent('USER_ACCOUNT_TOGGLE', `Customer ${cleanEmail} status set to ${u.status}`);
                 showSecToast(`User account ${u.status}`);
             }
         };

@@ -98,6 +98,23 @@ function updateGlobalNavbarAuthUI(user) {
     const mobileBtn = document.getElementById('navMobileActionBtn');
 
     if (user) {
+        // Master Suspension Guard
+        let suspendedUsers = [];
+        try {
+            suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+        } catch(e) {}
+
+        if (user.email && suspendedUsers.includes(user.email.toLowerCase())) {
+            console.warn("Account is SUSPENDED. Forcing immediate sign-out.");
+            localStorage.removeItem('shoora_logged_in_user_email');
+            signOut(auth).then(() => {
+                if (!window.location.pathname.includes('login.html')) {
+                    window.location.href = 'login.html?suspended=true';
+                }
+            });
+            return;
+        }
+
         // Authenticated State -> Sync to Local Storage & Firestore Profile
         localStorage.setItem('shoora_logged_in_user_email', user.email);
 

@@ -777,6 +777,27 @@
                 if (authResolved && !user) return;
                 authResolved = true;
 
+                // Suspension Guard
+                let suspendedUsers = [];
+                try {
+                    suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+                } catch(e) {}
+
+                const userEmail = (user && user.email) ? user.email.toLowerCase() : (localStorage.getItem('shoora_logged_in_user_email') || '').toLowerCase();
+
+                if (userEmail && suspendedUsers.includes(userEmail)) {
+                    console.warn("User account is SUSPENDED. Evicting session.");
+                    localStorage.removeItem('shoora_logged_in_user_email');
+                    if (typeof firebase !== 'undefined' && firebase.auth) {
+                        try { await firebase.auth().signOut(); } catch(e) {}
+                    }
+                    if (window.auth && window.auth.signOut) {
+                        try { await window.auth.signOut(); } catch(e) {}
+                    }
+                    window.location.href = 'login.html?suspended=true';
+                    return;
+                }
+
                 if (!user) {
                     // Check if local transaction exists before redirecting
                     const hasLocalTx = localStorage.getItem('shoora_last_transaction') || localStorage.getItem('shoora_all_purchased_keys');
