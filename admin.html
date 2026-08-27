@@ -551,7 +551,7 @@
                 <i class="fas fa-shield-halved"></i>
             </div>
             <h1 class="gateway-title">Enterprise Security Gateway</h1>
-            <p class="gateway-subtitle">Restricted to authorized SHOORA AI platform controllers. Enter cryptographic master passcode to initialize in-memory controls.</p>
+            <p class="gateway-subtitle">Restricted to authorized SHOORA AI platform controllers. Authenticate via Master Passcode or Google Admin Account.</p>
             
             <div id="secErrorBox" class="sec-error-box"></div>
             
@@ -561,6 +561,17 @@
                     <i class="fas fa-key"></i> <span>Authenticate Gateway</span>
                 </button>
             </form>
+
+            <div style="display: flex; align-items: center; margin: 16px 0; color: var(--sec-muted); font-size: 0.8rem;">
+                <span style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></span>
+                <span style="padding: 0 10px;">OR</span>
+                <span style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></span>
+            </div>
+
+            <button type="button" onclick="window.adminGoogleAuth()" class="sec-btn-auth" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fab fa-google" style="color: #4285F4; font-size: 1.1rem;"></i> <span>Authorize with Google Admin</span>
+            </button>
+
             <div style="margin-top: 18px; font-size: 0.75rem; color: var(--sec-muted);">
                 <i class="fas fa-lock"></i> Zero-Trust TLS 1.3 Cryptographic Session
             </div>
@@ -573,7 +584,22 @@
     <div id="secToast"></div>
 
     <script type="module">
-        import { auth, db, collection, getDocs, doc, setDoc, updateDoc, serverTimestamp, signInAnonymously, onSnapshot } from "./js/firebase-config.js";
+        import { 
+            auth, 
+            db, 
+            collection, 
+            getDocs, 
+            getDoc, 
+            doc, 
+            setDoc, 
+            updateDoc, 
+            deleteDoc, 
+            serverTimestamp, 
+            signInAnonymously, 
+            signInWithPopup, 
+            googleProvider, 
+            onSnapshot 
+        } from "./js/firebase-config.js";
 
         // Global in-memory data cache
         let adminData = {
@@ -613,6 +639,19 @@
             toast.innerHTML = `<i class="fas ${icon}" style="color: ${color}; font-size: 1.1rem;"></i> <span>${msg}</span>`;
             toast.style.display = 'flex';
             setTimeout(() => { toast.style.display = 'none'; }, 3200);
+        };
+
+        // Google Admin Authentication
+        window.adminGoogleAuth = async function() {
+            try {
+                const res = await signInWithPopup(auth, googleProvider);
+                if (res && res.user) {
+                    sessionStorage.setItem('shoora_admin_authed', 'true');
+                    await initializeAdminControlCenter();
+                }
+            } catch(e) {
+                showAuthError("Google Admin Authentication Failed: " + (e.message || e.code));
+            }
         };
 
         // Brute Force Guard & Rate Limiter
@@ -697,6 +736,8 @@
             const root = document.getElementById('dynamicAdminRoot');
             root.style.display = 'block';
 
+            const adminEmail = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : 'Master Operator';
+
             // Construct Full In-Memory Markup
             root.innerHTML = `
                 <!-- Navbar -->
@@ -706,11 +747,12 @@
                         <span>SHOORA AI</span>
                         <span class="sec-badge">Command Center</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
                         <div class="sec-status-pill">
                             <div class="sec-status-dot"></div>
-                            <span>Zero-Trust Session Active</span>
+                            <span>Cloud DB Live (${adminEmail})</span>
                         </div>
+                        <button onclick="window.refreshFromCloudDirect(true)" class="btn-table-sm btn-table-copy" style="padding: 6px 12px; font-size: 0.8rem;" title="Force Live Sync"><i class="fas fa-arrows-rotate"></i> <span>Sync DB</span></button>
                         <a href="index.html" target="_blank" style="color: var(--sec-muted); font-size: 0.85rem; text-decoration: none;"><i class="fas fa-external-link-alt"></i> Live Site</a>
                         <button onclick="window.lockAdminPortal()" class="sec-btn-lock"><i class="fas fa-lock"></i> Lock Portal</button>
                     </div>
@@ -1167,9 +1209,117 @@
                 }
             } catch(e) {}
 
+            await window.refreshFromCloudDirect(false);
             renderAllTables();
             updateMetricsRibbon();
         };
+
+        // Direct Cloud Firestore Multi-Layer Live Fetcher
+        window.refreshFromCloudDirect = async function(manual = false) {
+            if (!db) return;
+
+            try {
+                // 1. Fetch Suspensions & Revocations
+                if (doc && getDoc) {
+                    try {
+                        const secSnap = await getDoc(doc(db, "platform_security", "suspensions"));
+                        if (secSnap.exists()) {
+                            const secData = secSnap.data();
+                            adminCloudSuspended = (secData.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                            adminCloudRevoked = (secData.revokedKeys || []).map(k => (k || '').trim());
+                        }
+                    } catch(e) {
+                        console.warn("Direct suspensions notice:", e);
+                    }
+                }
+
+                // 2. Fetch Vault Inventory
+                if (collection && getDocs) {
+                    try {
+                        const vaultSnap = await getDocs(collection(db, "inventory_vault"));
+                        adminData.vault = vaultSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    } catch(e) {
+                        console.warn("Direct vault notice:", e);
+                    }
+                }
+
+                // 3. Fetch Orders
+                if (collection && getDocs) {
+                    try {
+                        const ordersSnap = await getDocs(collection(db, "orders"));
+                        adminData.orders = ordersSnap.docs.map(d => {
+                            const o = d.data();
+                            const isRevoked = (o.status === 'REVOKED' || o.status === 'revoked') || adminCloudRevoked.includes(o.apiKey);
+                            return {
+                                orderId: d.id,
+                                ...o,
+                                status: isRevoked ? 'REVOKED' : (o.status || 'ACTIVE')
+                            };
+                        });
+                        adminData.userKeys = adminData.orders.filter(o => o.apiKey);
+                    } catch(e) {
+                        console.warn("Direct orders notice:", e);
+                    }
+                }
+
+                // 4. Fetch Users Collection
+                if (collection && getDocs) {
+                    try {
+                        const usersSnap = await getDocs(collection(db, "users"));
+                        const userMap = {};
+
+                        usersSnap.docs.forEach(d => {
+                            const u = d.data();
+                            if (u && u.email) {
+                                const emailLower = u.email.toLowerCase().trim();
+                                const isSusp = (u.status === 'SUSPENDED') || adminCloudSuspended.includes(emailLower);
+                                userMap[emailLower] = {
+                                    uid: d.id,
+                                    email: u.email,
+                                    displayName: u.displayName || u.email.split('@')[0],
+                                    keysCount: 0,
+                                    totalSpent: 0,
+                                    status: isSusp ? 'SUSPENDED' : 'ACTIVE',
+                                    lastSeen: u.lastSeen || ''
+                                };
+                            }
+                        });
+
+                        // Merge stats from Orders
+                        adminData.orders.forEach(o => {
+                            const em = (o.email || o.userEmail || '').toLowerCase().trim();
+                            if (em) {
+                                if (!userMap[em]) {
+                                    userMap[em] = { email: em, keysCount: 0, totalSpent: 0, status: adminCloudSuspended.includes(em) ? 'SUSPENDED' : 'ACTIVE' };
+                                }
+                                userMap[em].keysCount++;
+                                userMap[em].totalSpent += Number(o.amount || o.price || 0);
+                            }
+                        });
+
+                        adminData.users = Object.values(userMap);
+                    } catch(e) {
+                        console.warn("Direct users notice:", e);
+                    }
+                }
+
+                renderAllTables();
+                updateMetricsRibbon();
+
+                if (manual) {
+                    showSecToast(`Cloud Database Synchronized: ${adminData.users.length} Users, ${adminData.orders.length} Orders`, "fa-arrows-rotate");
+                }
+            } catch(err) {
+                console.error("Direct Cloud Fetch error:", err);
+            }
+        };
+
+        // Continuous Background Live Fetcher (Every 2.5 seconds)
+        setInterval(() => {
+            if (sessionStorage.getItem('shoora_admin_authed') === 'true') {
+                window.refreshFromCloudDirect(false);
+            }
+        }, 2500);
 
         async function saveVaultKeyToCloud(keyObj) {
             if (db && doc && setDoc) {
