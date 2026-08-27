@@ -1045,23 +1045,7 @@
                 adminData.vault = saved ? JSON.parse(saved) : [];
             }
 
-            // 1b. Load Cloud Security Settings (Suspended Users & Revoked Keys)
-            try {
-                if (db && doc && getDoc) {
-                    const secSnap = await getDoc(doc(db, "system_config", "security"));
-                    if (secSnap && secSnap.exists()) {
-                        const sec = secSnap.data();
-                        if (sec.suspendedUsers) {
-                            localStorage.setItem('shoora_suspended_users', JSON.stringify(sec.suspendedUsers));
-                        }
-                        if (sec.revokedKeys) {
-                            localStorage.setItem('shoora_revoked_keys', JSON.stringify(sec.revokedKeys));
-                        }
-                    }
-                }
-            } catch(e) {}
-
-            // 2. Load Real Registered Users from Firestore (Live & Cloud Synced)
+            // 2. Load Real Registered Users from Firestore
             adminData.users = [];
             try {
                 if (db && collection && getDocs) {
@@ -1082,9 +1066,7 @@
                         });
                     }
                 }
-            } catch(e) {
-                console.warn("Firestore users retrieval notice:", e);
-            }
+            } catch(e) {}
 
             // 3. Load Real Orders from Firestore & Local Storage
             adminData.orders = [];
@@ -1503,18 +1485,13 @@
                 } catch(e) {}
 
                 // 6. Cloud Firestore Synchronization
-                if (db && doc && setDoc) {
+                if (window.db && window.doc && window.setDoc) {
                     try {
-                        setDoc(doc(db, "system_config", "security"), {
-                            revokedKeys: revokedList,
-                            lastUpdated: new Date().toISOString()
-                        }, { merge: true }).catch(err => console.warn("Cloud key revocation error:", err));
-
                         if (k.orderId) {
-                            setDoc(doc(db, "orders", k.orderId), { status: k.status }, { merge: true }).catch(() => {});
+                            window.setDoc(window.doc(window.db, "orders", k.orderId), { status: k.status }, { merge: true }).catch(() => {});
                         }
                         if (k.uid && (k.keyId || k.id)) {
-                            setDoc(doc(db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true }).catch(() => {});
+                            window.setDoc(window.doc(window.db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true }).catch(() => {});
                         }
                     } catch(e) {}
                 }
@@ -1525,7 +1502,7 @@
             }
         };
 
-        window.toggleUserAccount = function(email) {
+        window.toggleUserAccount = async function(email) {
             const cleanEmail = (email || '').toLowerCase().trim();
             const u = adminData.users.find(item => item.email.toLowerCase() === cleanEmail);
             if (u) {
@@ -1544,29 +1521,30 @@
                 }
                 localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedList));
 
-                // 2. Save user status in accounts cache
-                localStorage.setItem('shoora_admin_users', JSON.stringify(adminData.users));
-
-                // 3. Cloud Firestore Synchronization (Cross-Domain Cloud Broadcast)
+                // 2. Cloud Firestore Real-Time Global Synchronization
                 if (db && doc && setDoc) {
                     try {
-                        setDoc(doc(db, "system_config", "security"), {
-                            suspendedUsers: suspendedList,
-                            lastUpdated: new Date().toISOString()
-                        }, { merge: true }).catch(err => console.warn("Cloud config error:", err));
+                        await setDoc(doc(db, "platform_security", "suspensions"), {
+                            suspendedEmails: suspendedList,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
+                    } catch(err) {
+                        console.warn("Cloud suspension doc sync notice:", err);
+                    }
 
-                        if (u.uid) {
-                            setDoc(doc(db, "users", u.uid), { 
-                                status: u.status,
-                                suspendedAt: u.status === 'SUSPENDED' ? new Date().toISOString() : null 
-                            }, { merge: true }).catch(err => console.warn("User status error:", err));
-                        }
-                    } catch(e) {}
+                    if (u.uid) {
+                        try {
+                            await setDoc(doc(db, "users", u.uid), { status: u.status }, { merge: true });
+                        } catch(e) {}
+                    }
                 }
+
+                // 3. Save user status in accounts cache
+                localStorage.setItem('shoora_admin_users', JSON.stringify(adminData.users));
 
                 renderAccountsTable();
                 logAuditEvent('USER_ACCOUNT_TOGGLE', `Customer ${cleanEmail} status set to ${u.status}`);
-                showSecToast(`User account ${u.status}`);
+                showSecToast(`User account set to ${u.status} (Cloud Policy Updated)`);
             }
         };
 

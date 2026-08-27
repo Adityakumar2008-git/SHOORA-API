@@ -25,8 +25,7 @@ import {
     where, 
     addDoc,
     serverTimestamp,
-    updateDoc,
-    onSnapshot
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase App Configuration (Project: shoraai)
@@ -64,8 +63,7 @@ export {
     where,
     addDoc,
     serverTimestamp,
-    updateDoc,
-    onSnapshot
+    updateDoc
 };
 
 // Expose on window for global script accessibility
@@ -94,20 +92,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function updateGlobalNavbarAuthUI(user) {
+async function updateGlobalNavbarAuthUI(user) {
     const navCta = document.querySelector('.nav-cta');
     const navLinks = document.getElementById('navLinks');
     const mobileBtn = document.getElementById('navMobileActionBtn');
 
     if (user) {
-        // Master Suspension Guard
+        // Master Suspension Guard (Local Cache Check)
         let suspendedUsers = [];
         try {
             suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
         } catch(e) {}
 
         if (user.email && suspendedUsers.includes(user.email.toLowerCase())) {
-            console.warn("Account is SUSPENDED. Forcing immediate sign-out.");
+            console.warn("Account is SUSPENDED (Local Guard). Forcing immediate sign-out.");
             localStorage.removeItem('shoora_logged_in_user_email');
             signOut(auth).then(() => {
                 if (!window.location.pathname.includes('login.html')) {
@@ -115,6 +113,51 @@ function updateGlobalNavbarAuthUI(user) {
                 }
             });
             return;
+        }
+
+        // Master Suspension Guard (Cloud Firestore Real-Time Check)
+        if (db && getDoc && doc) {
+            try {
+                // 1. Check Global Platform Security Suspensions Doc
+                const secDoc = await getDoc(doc(db, "platform_security", "suspensions"));
+                if (secDoc.exists()) {
+                    const data = secDoc.data();
+                    const cloudSuspended = (data.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                    if (cloudSuspended.includes(user.email.toLowerCase().trim())) {
+                        console.warn("Account is SUSPENDED (Cloud Security Policy). Evicting session.");
+                        if (!suspendedUsers.includes(user.email.toLowerCase())) {
+                            suspendedUsers.push(user.email.toLowerCase());
+                            localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedUsers));
+                        }
+                        localStorage.removeItem('shoora_logged_in_user_email');
+                        signOut(auth).then(() => {
+                            if (!window.location.pathname.includes('login.html')) {
+                                window.location.href = 'login.html?suspended=true';
+                            }
+                        });
+                        return;
+                    }
+                }
+
+                // 2. Check Individual User Profile Doc
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists() && userDoc.data().status === 'SUSPENDED') {
+                    console.warn("Account is SUSPENDED (User Doc Status). Evicting session.");
+                    if (!suspendedUsers.includes(user.email.toLowerCase())) {
+                        suspendedUsers.push(user.email.toLowerCase());
+                        localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedUsers));
+                    }
+                    localStorage.removeItem('shoora_logged_in_user_email');
+                    signOut(auth).then(() => {
+                        if (!window.location.pathname.includes('login.html')) {
+                            window.location.href = 'login.html?suspended=true';
+                        }
+                    });
+                    return;
+                }
+            } catch (err) {
+                console.warn("Security cloud sync notice:", err);
+            }
         }
 
         // Authenticated State -> Sync to Local Storage & Firestore Profile
@@ -197,37 +240,3 @@ function updateGlobalNavbarAuthUI(user) {
         window.updateCheckoutUserUI(user);
     }
 }
-
-// Global Real-Time Cloud Security & Suspension Watcher
-try {
-    if (db && doc && onSnapshot) {
-        onSnapshot(doc(db, "system_config", "security"), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.suspendedUsers) {
-                    localStorage.setItem('shoora_suspended_users', JSON.stringify(data.suspendedUsers));
-                }
-                if (data.revokedKeys) {
-                    localStorage.setItem('shoora_revoked_keys', JSON.stringify(data.revokedKeys));
-                }
-
-                const currentAuthUser = auth.currentUser;
-                const cachedUserEmail = localStorage.getItem('shoora_logged_in_user_email');
-                const activeEmail = (currentAuthUser && currentAuthUser.email) ? currentAuthUser.email.toLowerCase() : (cachedUserEmail || '').toLowerCase();
-
-                if (activeEmail && data.suspendedUsers && data.suspendedUsers.includes(activeEmail)) {
-                    console.warn("Real-time cloud suspension push received. Evicting session.");
-                    localStorage.removeItem('shoora_logged_in_user_email');
-                    signOut(auth).then(() => {
-                        if (!window.location.pathname.includes('login.html')) {
-                            window.location.href = 'login.html?suspended=true';
-                        }
-                    });
-                }
-            }
-        }, (err) => {
-            console.warn("Realtime cloud listener notice:", err);
-        });
-    }
-} catch(e) {}
-
