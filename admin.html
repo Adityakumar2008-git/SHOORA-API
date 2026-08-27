@@ -573,7 +573,7 @@
     <div id="secToast"></div>
 
     <script type="module">
-        import { auth, db, collection, getDocs, doc, setDoc, updateDoc, serverTimestamp } from "./js/firebase-config.js";
+        import { auth, db, collection, getDocs, doc, setDoc, updateDoc, serverTimestamp, signInAnonymously, onSnapshot } from "./js/firebase-config.js";
 
         // Global in-memory data cache
         let adminData = {
@@ -642,7 +642,7 @@
                 sessionStorage.removeItem('shoora_lockout_time');
 
                 logAuditEvent('GATEWAY_AUTH_SUCCESS', 'System Master Token Authenticated');
-                initializeAdminControlCenter();
+                await initializeAdminControlCenter();
             } else {
                 failedAttempts++;
                 sessionStorage.setItem('shoora_auth_fails', failedAttempts.toString());
@@ -684,6 +684,15 @@
 
         // Initialize Dynamic In-Memory Admin Command Center
         async function initializeAdminControlCenter() {
+            // Authenticate with Firebase Auth if not already signed in
+            if (typeof auth !== 'undefined' && !auth.currentUser) {
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    console.warn("Admin Firebase Auth note:", e);
+                }
+            }
+
             document.getElementById('secGatewayShell').style.display = 'none';
             const root = document.getElementById('dynamicAdminRoot');
             root.style.display = 'block';
@@ -1483,21 +1492,11 @@
             if (u) {
                 u.status = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
                 
-                // 1. Fetch current Cloud Firestore Suspensions List
+                // 1. Maintain dedicated shoora_suspended_users registry
                 let suspendedList = [];
-                if (db && doc && getDoc) {
-                    try {
-                        const secSnap = await getDoc(doc(db, "platform_security", "suspensions"));
-                        if (secSnap.exists()) {
-                            suspendedList = (secSnap.data().suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
-                        }
-                    } catch(e) {}
-                }
-                if (suspendedList.length === 0) {
-                    try {
-                        suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
-                    } catch(e) {}
-                }
+                try {
+                    suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+                } catch(e) {}
 
                 if (u.status === 'SUSPENDED') {
                     if (!suspendedList.includes(cleanEmail)) suspendedList.push(cleanEmail);

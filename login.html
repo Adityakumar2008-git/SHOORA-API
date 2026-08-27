@@ -406,25 +406,22 @@
             if (!email) return false;
             const cleanEmail = email.toLowerCase().trim();
 
-            // 1. Live Query to Cloud Firestore platform_security/suspensions
-            if (window.db && window.doc && window.getDoc) {
+            // 1. Live Check from Cloud Firestore Single Source of Truth
+            if (typeof db !== 'undefined' && db && db.collection) {
                 try {
-                    const secDoc = await window.getDoc(window.doc(window.db, "platform_security", "suspensions"));
-                    if (secDoc.exists()) {
-                        const data = secDoc.data();
+                    const snap = await db.collection("platform_security").doc("suspensions").get();
+                    if (snap.exists) {
+                        const data = snap.data();
                         const cloudSuspended = (data.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
-                        
-                        // Sync fresh list to local cache
                         localStorage.setItem('shoora_suspended_users', JSON.stringify(cloudSuspended));
-                        
                         return cloudSuspended.includes(cleanEmail);
                     }
                 } catch(e) {
-                    console.warn("Cloud security policy fetch notice:", e);
+                    console.warn("Cloud suspension check notice:", e);
                 }
             }
 
-            // Fallback to local cache if offline
+            // 2. Fallback to Local Cache
             let suspendedUsers = [];
             try {
                 suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
@@ -442,11 +439,11 @@
             }
         }
 
-        // Redirect if already logged in (With Live Cloud Suspension Check)
+        // Redirect if already logged in (With Strict Cloud Suspension Check)
         auth.onAuthStateChanged(async user => {
             if (user && user.email) {
-                const suspended = await isUserSuspended(user.email);
-                if (suspended) {
+                const isSusp = await isUserSuspended(user.email);
+                if (isSusp) {
                     localStorage.removeItem('shoora_logged_in_user_email');
                     await auth.signOut();
                     const errAlert = document.getElementById('authErrorAlert');
@@ -455,12 +452,6 @@
                         errAlert.style.display = 'block';
                     }
                     return;
-                }
-
-                // If reactivated and was showing suspended banner, clear alert
-                const errAlert = document.getElementById('authErrorAlert');
-                if (errAlert && errAlert.textContent.includes('Account Suspended')) {
-                    errAlert.style.display = 'none';
                 }
 
                 const redirect = urlParams.get('redirect') || 'dashboard.html';
@@ -481,18 +472,14 @@
             errAlert.style.display = 'none';
             succAlert.style.display = 'none';
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking Cloud Security...';
-
-            const suspended = await isUserSuspended(email);
-            if (suspended) {
+            const isPreSusp = await isUserSuspended(email);
+            if (isPreSusp) {
                 errAlert.innerHTML = '<i class="fas fa-ban"></i> <strong>Account Suspended:</strong> This account has been suspended by the Security Administrator. Access is blocked. Contact support@shooraai.tech.';
                 errAlert.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = currentAuthMode === 'signin' ? 'Sign In to Platform' : 'Create Free Account';
                 return;
             }
 
+            btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
@@ -504,16 +491,12 @@
                         await user.updateProfile({ displayName: name });
                     }
 
-                    if (window.db && window.doc && window.setDoc) {
-                        try {
-                            await window.setDoc(window.doc(window.db, "users", user.uid), {
-                                uid: user.uid,
-                                email: user.email,
-                                displayName: name || email.split('@')[0],
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                        } catch(e) {}
-                    }
+                    await db.collection("users").doc(user.uid).set({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: name || email.split('@')[0],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
 
                     succAlert.textContent = 'Account created successfully! Redirecting...';
                     succAlert.style.display = 'block';
@@ -522,8 +505,8 @@
                     const userCredential = await auth.signInWithEmailAndPassword(email, password);
                     const user = userCredential.user;
 
-                    const liveSuspended = await isUserSuspended(user.email);
-                    if (liveSuspended) {
+                    const isPostSusp = await isUserSuspended(user.email);
+                    if (isPostSusp) {
                         localStorage.removeItem('shoora_logged_in_user_email');
                         await auth.signOut();
                         errAlert.innerHTML = '<i class="fas fa-ban"></i> <strong>Account Suspended:</strong> Access Denied. Your account has been suspended by Security Administrator.';
@@ -538,7 +521,7 @@
                 }
 
                 const redirect = urlParams.get('redirect') || 'dashboard.html';
-                setTimeout(() => window.location.href = redirect, 800);
+                setTimeout(() => window.location.href = redirect, 1000);
 
             } catch (error) {
                 console.error("Auth Error:", error);
@@ -563,8 +546,8 @@
                 const result = await auth.signInWithPopup(googleProvider);
                 const user = result.user;
 
-                const liveSuspended = await isUserSuspended(user.email);
-                if (liveSuspended) {
+                const isGoogleSusp = await isUserSuspended(user.email);
+                if (isGoogleSusp) {
                     localStorage.removeItem('shoora_logged_in_user_email');
                     await auth.signOut();
                     googleBtn.disabled = false;
@@ -574,16 +557,12 @@
                     return;
                 }
 
-                if (window.db && window.doc && window.setDoc) {
-                    try {
-                        await window.setDoc(window.doc(window.db, "users", user.uid), {
-                            uid: user.uid,
-                            email: user.email,
-                            displayName: user.displayName || user.email.split('@')[0],
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
-                    } catch(e) {}
-                }
+                await db.collection("users").doc(user.uid).set({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || user.email.split('@')[0],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
 
                 const redirect = urlParams.get('redirect') || 'dashboard.html';
                 window.location.href = redirect;

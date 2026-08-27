@@ -9,6 +9,7 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword, 
     signInWithPopup, 
+    signInAnonymously,
     GoogleAuthProvider, 
     signOut, 
     onAuthStateChanged,
@@ -52,6 +53,7 @@ export {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signInWithPopup,
+    signInAnonymously,
     GoogleAuthProvider,
     signOut,
     onAuthStateChanged,
@@ -75,6 +77,7 @@ if (typeof window !== 'undefined') {
     window.auth = auth;
     window.db = db;
     window.googleProvider = googleProvider;
+    window.signInAnonymously = signInAnonymously;
     window.collection = collection;
     window.doc = doc;
     window.setDoc = setDoc;
