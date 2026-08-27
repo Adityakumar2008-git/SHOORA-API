@@ -1436,10 +1436,23 @@
             if (k) {
                 k.status = (k.status === 'REVOKED' || k.status === 'revoked') ? 'ACTIVE' : 'REVOKED';
                 
-                // 1. Sync to global keys list
+                // 1. Maintain dedicated shoora_revoked_keys list
+                let revokedList = [];
+                try {
+                    revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
+                } catch(e) {}
+
+                if (k.status === 'REVOKED') {
+                    if (!revokedList.includes(apiKey)) revokedList.push(apiKey);
+                } else {
+                    revokedList = revokedList.filter(x => x !== apiKey);
+                }
+                localStorage.setItem('shoora_revoked_keys', JSON.stringify(revokedList));
+
+                // 2. Sync to global keys list
                 localStorage.setItem('shoora_all_purchased_keys', JSON.stringify(adminData.userKeys));
                 
-                // 2. Sync to Email-scoped cache
+                // 3. Sync to Email-scoped cache
                 const email = (k.email || k.userEmail || '').toLowerCase();
                 if (email) {
                     try {
@@ -1451,7 +1464,7 @@
                     } catch(e) {}
                 }
 
-                // 3. Sync to UID-scoped cache
+                // 4. Sync to UID-scoped cache
                 if (k.uid) {
                     try {
                         const uidList = JSON.parse(localStorage.getItem('shoora_user_keys_' + k.uid) || '[]');
@@ -1462,7 +1475,7 @@
                     } catch(e) {}
                 }
 
-                // 4. Sync to last transaction cache
+                // 5. Sync to last transaction cache
                 try {
                     const lastTx = JSON.parse(localStorage.getItem('shoora_last_transaction') || '{}');
                     if (lastTx.apiKey === apiKey) {
@@ -1471,7 +1484,7 @@
                     }
                 } catch(e) {}
 
-                // 5. Cloud Firestore Synchronization
+                // 6. Cloud Firestore Synchronization
                 if (window.db && window.doc && window.setDoc) {
                     try {
                         if (k.orderId) {

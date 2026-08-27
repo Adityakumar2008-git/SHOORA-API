@@ -932,6 +932,30 @@
                 }
             });
             keysList = Array.from(uniqueMap.values());
+
+            // 7. Master Real-Time Revocation Synchronization
+            let revokedList = [];
+            try {
+                revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
+            } catch(e) {}
+
+            let allPurchasedMap = {};
+            try {
+                const allPurchased = JSON.parse(localStorage.getItem('shoora_all_purchased_keys') || '[]');
+                allPurchased.forEach(p => {
+                    if (p.apiKey) allPurchasedMap[p.apiKey] = (p.status || 'ACTIVE').toUpperCase();
+                });
+            } catch(e) {}
+
+            keysList.forEach(k => {
+                if (allPurchasedMap[k.apiKey]) {
+                    k.status = allPurchasedMap[k.apiKey];
+                }
+                if (revokedList.includes(k.apiKey)) {
+                    k.status = 'REVOKED';
+                }
+            });
+
             keysList.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
             globalUserKeys = keysList;
 
@@ -1002,7 +1026,7 @@
                 const quotaLimitNum = parseDailyLimit(k.usage);
                 const quotaDisplay = quotaLimitNum.toLocaleString('en-IN') + ' req/day';
 
-                const isRevoked = (k.status && (k.status === 'REVOKED' || k.status === 'revoked'));
+                const isRevoked = (k.status && (k.status === 'REVOKED' || k.status === 'revoked')) || (revokedList && revokedList.includes(fullKey));
                 const statusBadge = isRevoked ? 
                     `<span class="key-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fas fa-circle-xmark" style="margin-right: 4px;"></i> Revoked</span>` :
                     `<span class="key-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981;"><i class="fas fa-circle-check" style="margin-right: 4px;"></i> Active</span>`;
