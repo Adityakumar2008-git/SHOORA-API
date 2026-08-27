@@ -25,7 +25,8 @@ import {
     where, 
     addDoc,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase App Configuration (Project: shoraai)
@@ -63,7 +64,8 @@ export {
     where,
     addDoc,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    onSnapshot
 };
 
 // Expose on window for global script accessibility
@@ -195,3 +197,37 @@ function updateGlobalNavbarAuthUI(user) {
         window.updateCheckoutUserUI(user);
     }
 }
+
+// Global Real-Time Cloud Security & Suspension Watcher
+try {
+    if (db && doc && onSnapshot) {
+        onSnapshot(doc(db, "system_config", "security"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.suspendedUsers) {
+                    localStorage.setItem('shoora_suspended_users', JSON.stringify(data.suspendedUsers));
+                }
+                if (data.revokedKeys) {
+                    localStorage.setItem('shoora_revoked_keys', JSON.stringify(data.revokedKeys));
+                }
+
+                const currentAuthUser = auth.currentUser;
+                const cachedUserEmail = localStorage.getItem('shoora_logged_in_user_email');
+                const activeEmail = (currentAuthUser && currentAuthUser.email) ? currentAuthUser.email.toLowerCase() : (cachedUserEmail || '').toLowerCase();
+
+                if (activeEmail && data.suspendedUsers && data.suspendedUsers.includes(activeEmail)) {
+                    console.warn("Real-time cloud suspension push received. Evicting session.");
+                    localStorage.removeItem('shoora_logged_in_user_email');
+                    signOut(auth).then(() => {
+                        if (!window.location.pathname.includes('login.html')) {
+                            window.location.href = 'login.html?suspended=true';
+                        }
+                    });
+                }
+            }
+        }, (err) => {
+            console.warn("Realtime cloud listener notice:", err);
+        });
+    }
+} catch(e) {}
+
