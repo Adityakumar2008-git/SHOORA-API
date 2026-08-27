@@ -1027,163 +1027,150 @@
         };
 
         // Data Loader (Real Firestore + Cleaned Local Storage)
-        window.loadAllData = async function() {
-            // Get currently logged-in user email if available
-            const activeUserEmail = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : (localStorage.getItem('shoora_logged_in_user_email') || '');
+        // Real-Time Cloud Listeners Unsubscribers
+        let unsubscribeVault = null;
+        let unsubscribeUsers = null;
+        let unsubscribeOrders = null;
 
-            // 1. Load Inventory Vault
-            try {
-                if (db && collection && getDocs) {
-                    const vaultSnap = await getDocs(collection(db, "inventory_vault"));
-                    if (vaultSnap && !vaultSnap.empty) {
-                        adminData.vault = vaultSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.loadAllData = async function() {
+            // 1. Fetch Cloud Global Security Policy (Suspensions & Revocations)
+            let cloudSuspended = [];
+            let cloudRevoked = [];
+            if (db && doc && getDoc) {
+                try {
+                    const secSnap = await getDoc(doc(db, "platform_security", "suspensions"));
+                    if (secSnap.exists()) {
+                        const secData = secSnap.data();
+                        cloudSuspended = (secData.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                        cloudRevoked = (secData.revokedKeys || []).map(k => (k || '').trim());
+                        localStorage.setItem('shoora_suspended_users', JSON.stringify(cloudSuspended));
+                        localStorage.setItem('shoora_revoked_keys', JSON.stringify(cloudRevoked));
                     }
+                } catch(e) {
+                    console.warn("Security policy fetch notice:", e);
                 }
-            } catch(e) {}
-            if (!adminData.vault || adminData.vault.length === 0) {
-                const saved = localStorage.getItem('shoora_admin_vault');
-                adminData.vault = saved ? JSON.parse(saved) : [];
             }
 
-            // 2. Load Real Registered Users from Firestore
-            adminData.users = [];
-            try {
-                if (db && collection && getDocs) {
-                    const usersSnap = await getDocs(collection(db, "users"));
-                    if (usersSnap && !usersSnap.empty) {
-                        usersSnap.forEach(uDoc => {
-                            const u = uDoc.data();
+            // 2. Real-Time Cloud Inventory Vault Listener
+            if (db && collection && onSnapshot) {
+                if (unsubscribeVault) unsubscribeVault();
+                try {
+                    unsubscribeVault = onSnapshot(collection(db, "inventory_vault"), (snap) => {
+                        adminData.vault = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        renderVaultTable();
+                        updateMetricsRibbon();
+                    }, (err) => console.warn("Vault sync notice:", err));
+                } catch(e) {}
+            }
+
+            // 3. Real-Time Cloud Registered Users Listener
+            if (db && collection && onSnapshot) {
+                if (unsubscribeUsers) unsubscribeUsers();
+                try {
+                    unsubscribeUsers = onSnapshot(collection(db, "users"), (snap) => {
+                        const suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+                        const userMap = {};
+                        
+                        snap.docs.forEach(d => {
+                            const u = d.data();
                             if (u && u.email) {
-                                adminData.users.push({
-                                    uid: uDoc.id,
+                                const emailLower = u.email.toLowerCase().trim();
+                                const isSusp = (u.status === 'SUSPENDED') || suspendedList.includes(emailLower);
+                                userMap[emailLower] = {
+                                    uid: d.id,
                                     email: u.email,
                                     displayName: u.displayName || u.email.split('@')[0],
                                     keysCount: 0,
                                     totalSpent: 0,
-                                    status: u.status || 'ACTIVE'
-                                });
+                                    status: isSusp ? 'SUSPENDED' : 'ACTIVE',
+                                    lastSeen: u.lastSeen || ''
+                                };
                             }
                         });
-                    }
-                }
-            } catch(e) {}
 
-            // 3. Load Real Orders from Firestore & Local Storage
-            adminData.orders = [];
+                        // Calculate user stats from existing orders
+                        adminData.orders.forEach(o => {
+                            const em = (o.email || o.userEmail || '').toLowerCase().trim();
+                            if (em) {
+                                if (!userMap[em]) {
+                                    userMap[em] = { email: em, keysCount: 0, totalSpent: 0, status: suspendedList.includes(em) ? 'SUSPENDED' : 'ACTIVE' };
+                                }
+                                userMap[em].keysCount++;
+                                userMap[em].totalSpent += Number(o.amount || o.price || 0);
+                            }
+                        });
+
+                        adminData.users = Object.values(userMap);
+                        renderAccountsTable();
+                        updateMetricsRibbon();
+                    }, (err) => console.warn("Users sync notice:", err));
+                } catch(e) {}
+            }
+
+            // 4. Real-Time Cloud Orders & User Keys Listener
+            if (db && collection && onSnapshot) {
+                if (unsubscribeOrders) unsubscribeOrders();
+                try {
+                    unsubscribeOrders = onSnapshot(collection(db, "orders"), (snap) => {
+                        const revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
+                        adminData.orders = snap.docs.map(d => {
+                            const o = d.data();
+                            const orderId = d.id;
+                            const isRevoked = (o.status === 'REVOKED' || o.status === 'revoked') || revokedList.includes(o.apiKey);
+                            return {
+                                orderId: orderId,
+                                ...o,
+                                status: isRevoked ? 'REVOKED' : (o.status || 'ACTIVE')
+                            };
+                        });
+
+                        // Derive User-Purchased Keys list from Orders
+                        adminData.userKeys = adminData.orders.filter(o => o.apiKey);
+
+                        renderOrdersTable();
+                        renderUserKeysTable();
+                        renderAccountsTable();
+                        updateMetricsRibbon();
+                    }, (err) => console.warn("Orders sync notice:", err));
+                } catch(e) {}
+            }
+
+            // 5. Load Audit Logs from Cloud & Local
             try {
                 if (db && collection && getDocs) {
-                    const ordersSnap = await getDocs(collection(db, "orders"));
-                    if (ordersSnap && !ordersSnap.empty) {
-                        adminData.orders = ordersSnap.docs.map(d => ({ orderId: d.id, ...d.data() }));
+                    const auditSnap = await getDocs(collection(db, "platform_audit"));
+                    if (!auditSnap.empty) {
+                        adminData.audit = auditSnap.docs.map(d => d.data());
                     }
                 }
             } catch(e) {}
-
-            const savedOrders = localStorage.getItem('shoora_all_orders');
-            if (savedOrders) {
-                const parsedOrders = JSON.parse(savedOrders);
-                parsedOrders.forEach(po => {
-                    // Clean up and repair any old record
-                    const cleanEmail = (po.email || po.userEmail || activeUserEmail || '').trim();
-                    const cleanAmount = Number(po.amount || po.price || 0);
-                    if (cleanEmail && !adminData.orders.some(o => o.paymentId === po.paymentId || (o.apiKey && o.apiKey === po.apiKey))) {
-                        adminData.orders.push({
-                            ...po,
-                            email: cleanEmail,
-                            amount: cleanAmount
-                        });
-                    }
-                });
+            if (adminData.audit.length === 0) {
+                const savedAudit = localStorage.getItem('shoora_audit_logs');
+                adminData.audit = savedAudit ? JSON.parse(savedAudit) : [];
             }
-
-            // 4. Load Real User-Purchased Keys
-            adminData.userKeys = [];
-            const allPurchased = localStorage.getItem('shoora_all_purchased_keys');
-            if (allPurchased) {
-                const parsedPurchased = JSON.parse(allPurchased);
-                parsedPurchased.forEach(pk => {
-                    const realEmail = (pk.email || pk.userEmail || activeUserEmail || '').trim();
-                    const realPrice = Number(pk.amount || pk.price || 0);
-                    if (realEmail) {
-                        adminData.userKeys.push({
-                            ...pk,
-                            email: realEmail,
-                            price: realPrice,
-                            amount: realPrice
-                        });
-                    }
-                });
-            }
-
-            const lastTxStr = localStorage.getItem('shoora_last_transaction');
-            if (lastTxStr) {
-                const lastTx = JSON.parse(lastTxStr);
-                const realEmail = (lastTx.email || lastTx.userEmail || activeUserEmail || '').trim();
-                const realPrice = Number(lastTx.amount || lastTx.price || 0);
-                if (realEmail && !adminData.userKeys.some(k => k.apiKey === lastTx.apiKey)) {
-                    const cleanTx = {
-                        ...lastTx,
-                        email: realEmail,
-                        price: realPrice,
-                        amount: realPrice
-                    };
-                    adminData.userKeys.push(cleanTx);
-                    // Update last transaction in local storage with the real email
-                    localStorage.setItem('shoora_last_transaction', JSON.stringify(cleanTx));
-                }
-            }
-
-            // If orders were empty but userKeys exist, build real orders ledger
-            if (adminData.orders.length === 0 && adminData.userKeys.length > 0) {
-                adminData.orders = adminData.userKeys.map(k => ({
-                    orderId: k.orderId || ('ord_' + Math.random().toString(36).substr(2, 9)),
-                    paymentId: k.paymentId || 'pay_live',
-                    email: k.email || activeUserEmail || 'Customer',
-                    amount: Number(k.amount || k.price || 0),
-                    agent: k.agentName || k.agent || 'Shoora Agent',
-                    model: k.modelName || k.model || 'Foundation Model',
-                    accuracy: k.accuracy || '3',
-                    apiKey: k.apiKey,
-                    timestamp: k.timestamp || new Date().toISOString()
-                }));
-            }
-
-            // 5. Derive and Update Customer Accounts from Real Data
-            const accountMap = {};
-            // Register users from Firestore
-            adminData.users.forEach(u => {
-                accountMap[u.email] = u;
-            });
-            // Register users from Orders & Keys
-            adminData.userKeys.forEach(k => {
-                const em = (k.email || activeUserEmail || '').trim();
-                if (em) {
-                    if (!accountMap[em]) {
-                        accountMap[em] = { email: em, keysCount: 0, totalSpent: 0, status: 'ACTIVE' };
-                    }
-                    accountMap[em].keysCount++;
-                    accountMap[em].totalSpent += Number(k.amount || k.price || 0);
-                }
-            });
-            adminData.users = Object.values(accountMap);
-
-            // 6. Load Audit Logs
-            const savedAudit = localStorage.getItem('shoora_audit_logs');
-            adminData.audit = savedAudit ? JSON.parse(savedAudit) : [];
 
             renderAllTables();
             updateMetricsRibbon();
         };
 
-        function saveVault() {
-            localStorage.setItem('shoora_admin_vault', JSON.stringify(adminData.vault));
-            renderVaultTable();
-            updateMetricsRibbon();
+        async function saveVaultKeyToCloud(keyObj) {
+            if (db && doc && setDoc) {
+                try {
+                    await setDoc(doc(db, "inventory_vault", keyObj.id), keyObj, { merge: true });
+                } catch(e) {
+                    console.warn("Vault cloud write notice:", e);
+                }
+            }
         }
 
-        function saveAudit() {
-            localStorage.setItem('shoora_audit_logs', JSON.stringify(adminData.audit));
-            renderAuditTable();
+        async function deleteVaultKeyFromCloud(keyId) {
+            if (db && doc && deleteDoc) {
+                try {
+                    await deleteDoc(doc(db, "inventory_vault", keyId));
+                } catch(e) {
+                    console.warn("Vault cloud delete notice:", e);
+                }
+            }
         }
 
         function logAuditEvent(event, desc) {
@@ -1195,7 +1182,13 @@
                 checksum: 'sha256_' + Math.random().toString(36).substr(2, 8)
             };
             adminData.audit.unshift(log);
-            saveAudit();
+            localStorage.setItem('shoora_audit_logs', JSON.stringify(adminData.audit));
+            if (db && collection && addDoc) {
+                try {
+                    addDoc(collection(db, "platform_audit"), log).catch(() => {});
+                } catch(e) {}
+            }
+            renderAuditTable();
         }
 
         function updateMetricsRibbon() {
@@ -1204,12 +1197,19 @@
             const purchasedCount = adminData.userKeys.length;
             const grossRev = adminData.orders.reduce((sum, o) => sum + (Number(o.amount || o.price) || 0), 0);
 
-            document.getElementById('statTotalKeys').textContent = totalKeys;
-            document.getElementById('statAvailableKeys').textContent = availableKeys;
-            document.getElementById('statPurchasedKeys').textContent = purchasedCount;
-            document.getElementById('statGrossRevenue').textContent = '₹' + grossRev.toLocaleString('en-IN');
-            document.getElementById('statTotalOrders').textContent = adminData.orders.length;
-            document.getElementById('statTotalUsers').textContent = adminData.users.length;
+            const elTotalKeys = document.getElementById('statTotalKeys');
+            const elAvailKeys = document.getElementById('statAvailableKeys');
+            const elPurchased = document.getElementById('statPurchasedKeys');
+            const elGrossRev = document.getElementById('statGrossRevenue');
+            const elTotalOrders = document.getElementById('statTotalOrders');
+            const elTotalUsers = document.getElementById('statTotalUsers');
+
+            if (elTotalKeys) elTotalKeys.textContent = totalKeys;
+            if (elAvailKeys) elAvailKeys.textContent = availableKeys;
+            if (elPurchased) elPurchased.textContent = purchasedCount;
+            if (elGrossRev) elGrossRev.textContent = '₹' + grossRev.toLocaleString('en-IN');
+            if (elTotalOrders) elTotalOrders.textContent = adminData.orders.length;
+            if (elTotalUsers) elTotalUsers.textContent = adminData.users.length;
         }
 
         function renderAllTables() {
@@ -1357,8 +1357,8 @@
             `).join('');
         };
 
-        // Single Key Ingestion
-        window.submitSingleKey = function() {
+        // Single Key Ingestion (Cloud Firestore)
+        window.submitSingleKey = async function() {
             const agent = document.getElementById('stockAgent').value;
             const model = document.getElementById('stockModel').value;
             const accuracy = document.getElementById('stockAccuracy').value;
@@ -1379,22 +1379,21 @@
                 assignedTo: null
             };
 
-            adminData.vault.push(newKey);
-            saveVault();
+            await saveVaultKeyToCloud(newKey);
             document.getElementById('stockKeyValue').value = '';
-            logAuditEvent('KEY_INGEST', `Ingested single API key for ${agent}/${model}/L${accuracy}`);
-            showSecToast("API Key successfully stocked in Vault Pool!");
+            logAuditEvent('KEY_INGEST', `Ingested single API key into Cloud Vault for ${agent}/${model}/L${accuracy}`);
+            showSecToast("API Key successfully stored in Cloud Vault!");
         };
 
-        // 1-Click Bulk Key Generator
-        window.bulkGenerateKeys = function(count) {
+        // 1-Click Bulk Key Generator (Cloud Firestore)
+        window.bulkGenerateKeys = async function(count) {
             const agent = document.getElementById('stockAgent').value;
             const model = document.getElementById('stockModel').value;
             const accuracy = document.getElementById('stockAccuracy').value;
             const usage = document.getElementById('stockUsage').value;
 
             for (let i = 0; i < count; i++) {
-                adminData.vault.push({
+                const newKey = {
                     id: 'key_' + Math.random().toString(36).substr(2, 9),
                     agent: agent,
                     model: model,
@@ -1404,34 +1403,38 @@
                     status: 'available',
                     addedAt: new Date().toISOString(),
                     assignedTo: null
-                });
+                };
+                await saveVaultKeyToCloud(newKey);
             }
 
-            saveVault();
-            logAuditEvent('BULK_KEY_GENERATE', `Generated +${count} stock keys for ${agent}/${model}/L${accuracy}`);
-            showSecToast(`Successfully stocked +${count} keys into Vault Pool!`);
+            logAuditEvent('BULK_KEY_GENERATE', `Generated +${count} stock keys in Cloud Vault for ${agent}/${model}/L${accuracy}`);
+            showSecToast(`Successfully added +${count} keys into Cloud Vault Pool!`);
         };
 
-        window.deleteVaultKey = function(id) {
-            if (confirm("Are you sure you want to permanently delete this Key from inventory?")) {
-                adminData.vault = adminData.vault.filter(k => k.id !== id);
-                saveVault();
-                logAuditEvent('KEY_DELETE', `Deleted vault key ID: ${id}`);
-                showSecToast("Key removed from inventory vault.", "fa-trash", "#ef4444");
+        window.deleteVaultKey = async function(id) {
+            if (confirm("Are you sure you want to permanently delete this Key from cloud inventory?")) {
+                await deleteVaultKeyFromCloud(id);
+                logAuditEvent('KEY_DELETE', `Deleted cloud vault key ID: ${id}`);
+                showSecToast("Key permanently deleted from Cloud Vault.", "fa-trash", "#ef4444");
             }
         };
 
-        window.toggleKeyRevoke = function(id) {
+        window.toggleKeyRevoke = async function(id) {
             const keyObj = adminData.vault.find(k => k.id === id);
             if (keyObj) {
-                keyObj.status = keyObj.status === 'revoked' ? 'available' : 'revoked';
-                saveVault();
-                logAuditEvent('KEY_STATUS_TOGGLE', `Toggled key ID ${id} status to ${keyObj.status}`);
-                showSecToast(`Key status updated to ${keyObj.status.toUpperCase()}`);
+                const newStatus = keyObj.status === 'revoked' ? 'available' : 'revoked';
+                keyObj.status = newStatus;
+                if (db && doc && setDoc) {
+                    try {
+                        await setDoc(doc(db, "inventory_vault", id), { status: newStatus }, { merge: true });
+                    } catch(e) {}
+                }
+                logAuditEvent('KEY_STATUS_TOGGLE', `Toggled key ID ${id} status to ${newStatus}`);
+                showSecToast(`Key status updated to ${newStatus.toUpperCase()} (Cloud Updated)`);
             }
         };
 
-        window.toggleUserKeyStatus = function(apiKey) {
+        window.toggleUserKeyStatus = async function(apiKey) {
             const k = adminData.userKeys.find(item => item.apiKey === apiKey);
             if (k) {
                 k.status = (k.status === 'REVOKED' || k.status === 'revoked') ? 'ACTIVE' : 'REVOKED';
@@ -1449,56 +1452,28 @@
                 }
                 localStorage.setItem('shoora_revoked_keys', JSON.stringify(revokedList));
 
-                // 2. Sync to global keys list
-                localStorage.setItem('shoora_all_purchased_keys', JSON.stringify(adminData.userKeys));
-                
-                // 3. Sync to Email-scoped cache
-                const email = (k.email || k.userEmail || '').toLowerCase();
-                if (email) {
+                // 2. Cloud Firestore Real-Time Global Synchronization
+                if (db && doc && setDoc) {
                     try {
-                        const emailList = JSON.parse(localStorage.getItem('shoora_user_keys_' + email) || '[]');
-                        emailList.forEach(item => {
-                            if (item.apiKey === apiKey) item.status = k.status;
-                        });
-                        localStorage.setItem('shoora_user_keys_' + email, JSON.stringify(emailList));
+                        await setDoc(doc(db, "platform_security", "suspensions"), {
+                            revokedKeys: revokedList,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
                     } catch(e) {}
-                }
 
-                // 4. Sync to UID-scoped cache
-                if (k.uid) {
-                    try {
-                        const uidList = JSON.parse(localStorage.getItem('shoora_user_keys_' + k.uid) || '[]');
-                        uidList.forEach(item => {
-                            if (item.apiKey === apiKey) item.status = k.status;
-                        });
-                        localStorage.setItem('shoora_user_keys_' + k.uid, JSON.stringify(uidList));
-                    } catch(e) {}
-                }
-
-                // 5. Sync to last transaction cache
-                try {
-                    const lastTx = JSON.parse(localStorage.getItem('shoora_last_transaction') || '{}');
-                    if (lastTx.apiKey === apiKey) {
-                        lastTx.status = k.status;
-                        localStorage.setItem('shoora_last_transaction', JSON.stringify(lastTx));
-                    }
-                } catch(e) {}
-
-                // 6. Cloud Firestore Synchronization
-                if (window.db && window.doc && window.setDoc) {
                     try {
                         if (k.orderId) {
-                            window.setDoc(window.doc(window.db, "orders", k.orderId), { status: k.status }, { merge: true }).catch(() => {});
+                            await setDoc(doc(db, "orders", k.orderId), { status: k.status }, { merge: true });
                         }
                         if (k.uid && (k.keyId || k.id)) {
-                            window.setDoc(window.doc(window.db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true }).catch(() => {});
+                            await setDoc(doc(db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true });
                         }
                     } catch(e) {}
                 }
 
                 renderUserKeysTable();
                 logAuditEvent('USER_KEY_TOGGLE', `Toggled user key ${apiKey} to ${k.status}`);
-                showSecToast(`Customer Key status set to ${k.status}`);
+                showSecToast(`Customer Key status set to ${k.status} (Cloud Policy Updated)`);
             }
         };
 

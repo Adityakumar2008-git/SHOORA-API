@@ -836,28 +836,29 @@
             initDashboardAuth();
         });
 
+        let unsubscribeDashboardKeys = null;
+        let unsubscribeDashboardOrders = null;
+
         async function loadDashboardData(user) {
             const grid = document.getElementById('userKeysGrid');
             const receiptsTable = document.getElementById('userReceiptsTable');
             let keysList = [];
 
-            // 1. Try Firestore fetch (Compat)
-            if (user && user.uid && typeof firebase !== 'undefined' && firebase.firestore) {
+            // 1. Real-Time Cloud Firestore Sync for User's Owned Keys
+            if (user && user.uid && window.db && window.collection && window.onSnapshot) {
+                if (unsubscribeDashboardKeys) unsubscribeDashboardKeys();
                 try {
-                    const snapshot = await firebase.firestore().collection("users").doc(user.uid).collection("keys").get();
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data && data.apiKey) {
-                            keysList.push({ id: doc.id, ...data });
+                    unsubscribeDashboardKeys = window.onSnapshot(window.collection(window.db, "users", user.uid, "keys"), (snap) => {
+                        const cloudKeys = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        if (cloudKeys.length > 0) {
+                            renderSynchronizedDashboardKeys(cloudKeys, user);
                         }
-                    });
-                } catch (firestoreErr) {
-                    console.warn("Firestore fetch note:", firestoreErr.message);
-                }
+                    }, (err) => console.warn("Keys onSnapshot notice:", err));
+                } catch(e) {}
             }
 
-            // 1b. Try Modular Firestore fetch if Compat empty
-            if (keysList.length === 0 && user && user.uid && window.db && window.getDocs && window.collection) {
+            // 2. Fetch User Keys from Cloud Firestore directly
+            if (user && user.uid && window.db && window.getDocs && window.collection) {
                 try {
                     const snap = await window.getDocs(window.collection(window.db, "users", user.uid, "keys"));
                     snap.forEach(doc => {
@@ -871,79 +872,39 @@
                 }
             }
 
-            // 2. Check UID-scoped local storage
-            if (user && user.uid) {
+            // 3. Fetch Orders from Cloud Firestore for user email
+            if (user && user.email && window.db && window.getDocs && window.collection) {
                 try {
-                    const uidKeys = JSON.parse(localStorage.getItem('shoora_user_keys_' + user.uid) || '[]');
-                    uidKeys.forEach(k => {
-                        if (k && k.apiKey && !keysList.some(existing => existing.apiKey === k.apiKey)) {
-                            keysList.push(k);
+                    const ordersSnap = await window.getDocs(window.collection(window.db, "orders"));
+                    ordersSnap.forEach(doc => {
+                        const o = doc.data();
+                        const orderEmail = (o.email || o.userEmail || '').toLowerCase().trim();
+                        if (orderEmail === user.email.toLowerCase().trim() && o.apiKey) {
+                            if (!keysList.some(k => k.apiKey === o.apiKey)) {
+                                keysList.push({ id: doc.id, ...o });
+                            }
                         }
                     });
                 } catch (e) {}
             }
 
-            // 3. Check Email-scoped local storage
-            if (user && user.email) {
+            // 4. Legacy local cache fallback (if offline or new sync)
+            if (keysList.length === 0 && user && user.email) {
                 try {
                     const emailKeys = JSON.parse(localStorage.getItem('shoora_user_keys_' + user.email.toLowerCase()) || '[]');
-                    emailKeys.forEach(k => {
-                        if (k && k.apiKey && !keysList.some(existing => existing.apiKey === k.apiKey)) {
-                            keysList.push(k);
-                        }
-                    });
-                } catch (e) {}
+                    emailKeys.forEach(k => { if (k && k.apiKey && !keysList.some(x => x.apiKey === k.apiKey)) keysList.push(k); });
+                } catch(e) {}
             }
 
-            // 4. Check Global purchased keys list
-            try {
-                const allKeys = JSON.parse(localStorage.getItem('shoora_all_purchased_keys') || '[]');
-                allKeys.forEach(k => {
-                    if (k && k.apiKey && !keysList.some(existing => existing.apiKey === k.apiKey)) {
-                        if (!user || !k.uid || k.uid === user.uid || (user.email && k.userEmail && k.userEmail.toLowerCase() === user.email.toLowerCase()) || keysList.length === 0) {
-                            keysList.push(k);
-                        }
-                    }
-                });
-            } catch (e) {}
+            renderSynchronizedDashboardKeys(keysList, user);
+        }
 
-            // 5. Check last transaction fallback
-            const lastTxStr = localStorage.getItem('shoora_last_transaction');
-            if (lastTxStr) {
-                try {
-                    const tx = JSON.parse(lastTxStr);
-                    if (tx && tx.apiKey && !keysList.some(k => k.apiKey === tx.apiKey)) {
-                        if (!user || !tx.uid || tx.uid === user.uid || (user.email && tx.userEmail && tx.userEmail.toLowerCase() === user.email.toLowerCase()) || keysList.length === 0) {
-                            keysList.push(tx);
-                        }
-                    }
-                } catch (e) {}
-            }
+        function renderSynchronizedDashboardKeys(rawKeys, user) {
+            const grid = document.getElementById('userKeysGrid');
+            const receiptsTable = document.getElementById('userReceiptsTable');
+            if (!grid || !receiptsTable) return;
 
-            // 6. Check admin vault assignments for user email
-            if (user && user.email) {
-                const adminVault = localStorage.getItem('shoora_admin_vault');
-                if (adminVault) {
-                    try {
-                        const vault = JSON.parse(adminVault);
-                        const userAssigned = vault.filter(v => v.assignedTo && v.assignedTo.toLowerCase() === user.email.toLowerCase());
-                        userAssigned.forEach(v => {
-                            if (!keysList.some(existing => existing.apiKey === v.key)) {
-                                keysList.push({
-                                    apiKey: v.key,
-                                    agent: v.agent || 'omni',
-                                    model: v.model || 'ultra',
-                                    accuracy: v.accuracy || '3',
-                                    usage: '10,000 requests/day',
-                                    amount: 6907,
-                                    paymentId: 'pay_vault_assigned',
-                                    timestamp: v.assignedAt || new Date().toISOString()
-                                });
-                            }
-                        });
-                    } catch (e) {}
-                }
-            }
+            let keysList = [...rawKeys];
 
             // Deduplicate and sort by timestamp descending
             const uniqueMap = new Map();
@@ -960,19 +921,8 @@
                 revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
             } catch(e) {}
 
-            let allPurchasedMap = {};
-            try {
-                const allPurchased = JSON.parse(localStorage.getItem('shoora_all_purchased_keys') || '[]');
-                allPurchased.forEach(p => {
-                    if (p.apiKey) allPurchasedMap[p.apiKey] = (p.status || 'ACTIVE').toUpperCase();
-                });
-            } catch(e) {}
-
             keysList.forEach(k => {
-                if (allPurchasedMap[k.apiKey]) {
-                    k.status = allPurchasedMap[k.apiKey];
-                }
-                if (revokedList.includes(k.apiKey)) {
+                if (revokedList.includes(k.apiKey) || (k.status && k.status.toUpperCase() === 'REVOKED')) {
                     k.status = 'REVOKED';
                 }
             });

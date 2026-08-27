@@ -75,9 +75,31 @@ function calculateShooraPrice(agentKey = 'omni', modelKey = 'ultra', accuracyKey
 window.calculateShooraPrice = calculateShooraPrice;
 
 /**
- * SHOORA AI Inventory Stock Engine & Availability Gatekeeper
+ * SHOORA AI Inventory Stock Engine & Availability Gatekeeper (Cloud Firestore)
  */
+let cloudVaultCache = [];
+let vaultListenerInit = false;
+
+function initCloudVaultListener() {
+    if (vaultListenerInit) return;
+    if (window.db && window.collection && window.onSnapshot) {
+        vaultListenerInit = true;
+        try {
+            window.onSnapshot(window.collection(window.db, "inventory_vault"), (snap) => {
+                cloudVaultCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                localStorage.setItem('shoora_admin_vault', JSON.stringify(cloudVaultCache));
+                if (typeof updateDynamicRegistrationPrice === 'function') {
+                    updateDynamicRegistrationPrice();
+                }
+            }, (err) => console.warn("Cloud vault sync:", err));
+        } catch(e) {}
+    }
+}
+document.addEventListener('DOMContentLoaded', initCloudVaultListener);
+if (typeof window !== 'undefined' && window.db) initCloudVaultListener();
+
 function getVaultInventoryList() {
+    if (cloudVaultCache && cloudVaultCache.length > 0) return cloudVaultCache;
     const raw = localStorage.getItem('shoora_admin_vault');
     try {
         return raw ? JSON.parse(raw) : [];
@@ -338,25 +360,30 @@ function initRegistrationWizardV6() {
             payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating API Key...';
             if (paymentStatus) paymentStatus.textContent = 'Fulfilling from Key Vault and binding to account...';
 
-            // 3. Fulfill from Inventory Vault
+            // 3. Fulfill from Inventory Vault (Cloud Firestore Sync)
             const userEmail = (currentUser && currentUser.email) ? currentUser.email : (cachedEmail || 'developer@shooraai.tech');
             const priceInRupees = calculateShooraPrice(selectedAgent, selectedModel, selectedAccuracy, (usageEl ? usageEl.value : '10k'));
 
             let apiKey = '';
-            const vaultData = localStorage.getItem('shoora_admin_vault');
-            if (vaultData) {
-                try {
-                    const vault = JSON.parse(vaultData);
-                    const match = vault.find(k => k.status === 'available' && k.agent === selectedAgent);
-                    if (match) {
-                        apiKey = match.key;
-                        match.status = 'assigned';
-                        match.assignedTo = userEmail;
-                        match.assignedAt = new Date().toISOString();
-                        localStorage.setItem('shoora_admin_vault', JSON.stringify(vault));
-                    }
-                } catch (e) {
-                    console.warn("Vault retrieval notice:", e);
+            let matchedVaultKey = null;
+            const vault = getVaultInventoryList();
+            matchedVaultKey = vault.find(k => k.status === 'available' && k.agent === selectedAgent);
+
+            if (matchedVaultKey) {
+                apiKey = matchedVaultKey.key;
+                matchedVaultKey.status = 'assigned';
+                matchedVaultKey.assignedTo = userEmail;
+                matchedVaultKey.assignedAt = new Date().toISOString();
+                
+                // Update in Cloud Firestore directly
+                if (window.db && window.doc && window.setDoc && matchedVaultKey.id) {
+                    try {
+                        window.setDoc(window.doc(window.db, "inventory_vault", matchedVaultKey.id), {
+                            status: 'assigned',
+                            assignedTo: userEmail,
+                            assignedAt: new Date().toISOString()
+                        }, { merge: true }).catch(() => {});
+                    } catch(e) {}
                 }
             }
 
@@ -388,7 +415,7 @@ function initRegistrationWizardV6() {
                 status: 'ACTIVE'
             };
 
-            // 5. Store in Firestore Vault
+            // 5. Store in Cloud Firestore (Single Source of Truth)
             if (window.db && window.doc && window.setDoc) {
                 try {
                     const orderDocRef = window.doc(window.db, "orders", transactionRecord.orderId);
@@ -398,7 +425,7 @@ function initRegistrationWizardV6() {
                 if (currentUser && currentUser.uid) {
                     try {
                         const userKeyDocRef = window.doc(window.db, "users", currentUser.uid, "keys", keyId);
-                        window.setDoc(userKeyDocRef, transactionRecord).catch(e => console.warn("User key Firestore notice:", e));
+                        window.setDoc(userKeyDocRef, transactionRecord).catch(e => console.warn("User Key Firestore notice:", e));
                     } catch(e) {}
                 }
             }

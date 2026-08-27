@@ -25,7 +25,9 @@ import {
     where, 
     addDoc,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    deleteDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase App Configuration (Project: shoraai)
@@ -63,7 +65,9 @@ export {
     where,
     addDoc,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    deleteDoc,
+    onSnapshot
 };
 
 // Expose on window for global script accessibility
@@ -77,10 +81,48 @@ if (typeof window !== 'undefined') {
     window.getDoc = getDoc;
     window.getDocs = getDocs;
     window.addDoc = addDoc;
+    window.deleteDoc = deleteDoc;
+    window.onSnapshot = onSnapshot;
     window.serverTimestamp = serverTimestamp;
     window.signOut = signOut;
     window.onAuthStateChanged = onAuthStateChanged;
 }
+
+// Global Real-Time Cloud Security Policy Listener (Instant Push across all domains)
+function initRealtimeSecurityListener() {
+    if (db && doc && onSnapshot) {
+        try {
+            onSnapshot(doc(db, "platform_security", "suspensions"), (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const suspendedList = (data.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                    const revokedList = (data.revokedKeys || []).map(k => (k || '').trim());
+                    
+                    localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedList));
+                    localStorage.setItem('shoora_revoked_keys', JSON.stringify(revokedList));
+
+                    // Check if current session belongs to a suspended account
+                    const currentUser = auth.currentUser;
+                    const cachedEmail = (localStorage.getItem('shoora_logged_in_user_email') || '').toLowerCase();
+                    const activeEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : cachedEmail;
+
+                    if (activeEmail && suspendedList.includes(activeEmail)) {
+                        console.warn("Real-time Security Policy: Account is SUSPENDED. Forcing instant eviction.");
+                        localStorage.removeItem('shoora_logged_in_user_email');
+                        signOut(auth).then(() => {
+                            if (!window.location.pathname.includes('login.html')) {
+                                window.location.href = 'login.html?suspended=true';
+                            }
+                        });
+                    }
+                }
+            }, (error) => {
+                console.warn("Realtime security listener notice:", error);
+            });
+        } catch(e) {}
+    }
+}
+initRealtimeSecurityListener();
 
 /**
  * Global Dynamic Navbar Auth Listener
