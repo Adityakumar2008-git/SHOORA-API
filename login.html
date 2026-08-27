@@ -406,13 +406,14 @@
             if (!email) return false;
             const cleanEmail = email.toLowerCase().trim();
 
-            // Direct Live Check from Cloud Firestore Single Source of Truth
+            // 1. Live Check from Cloud Firestore Single Source of Truth
             if (typeof db !== 'undefined' && db && db.collection) {
                 try {
                     const snap = await db.collection("platform_security").doc("suspensions").get();
                     if (snap.exists) {
                         const data = snap.data();
                         const cloudSuspended = (data.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                        localStorage.setItem('shoora_suspended_users', JSON.stringify(cloudSuspended));
                         return cloudSuspended.includes(cleanEmail);
                     }
                 } catch(e) {
@@ -420,7 +421,12 @@
                 }
             }
 
-            return false;
+            // 2. Fallback to Local Cache
+            let suspendedUsers = [];
+            try {
+                suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+            } catch(e) {}
+            return suspendedUsers.includes(cleanEmail);
         }
 
         // On Load Suspended Notice
