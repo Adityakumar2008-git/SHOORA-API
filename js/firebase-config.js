@@ -161,4 +161,9 @@ function updateGlobalNavbarAuthUI(user) {
         const userMenu = document.getElementById('navUserBadge');
         if (userMenu) userMenu.remove();
     }
+
+    // Immediately trigger checkout badge update if on register page
+    if (typeof window.updateCheckoutUserUI === 'function') {
+        window.updateCheckoutUserUI(user);
+    }
 }

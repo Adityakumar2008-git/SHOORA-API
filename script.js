@@ -931,41 +931,62 @@ function initCheckoutUserBadge() {
     const badge = document.getElementById('checkoutUserBadge');
     const summaryEmail = document.getElementById('summaryUserEmail');
     const statusSpan = document.getElementById('checkoutAuthStatus');
+    const noticeBox = document.getElementById('checkoutAuthNotice');
     if (!badge && !summaryEmail) return;
 
     const updateUserUI = (u) => {
-        if (u) {
-            if (badge) badge.textContent = `${u.displayName || u.email.split('@')[0]} (${u.email})`;
+        if (u && u.email) {
+            if (badge) badge.innerHTML = `<span style="color: #0f172a; font-weight: 700;">${u.displayName || u.email.split('@')[0]}</span> <span style="color: #64748b; font-size: 0.82rem;">(${u.email})</span>`;
             if (summaryEmail) summaryEmail.textContent = u.email;
             if (statusSpan) {
-                statusSpan.textContent = 'Verified';
-                statusSpan.style.color = '#10b981';
+                statusSpan.innerHTML = `<span style="color: #10b981; font-weight: 700; font-size: 0.8rem; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 20px;"><i class="fas fa-check-circle"></i> Verified</span>`;
+            }
+            if (noticeBox) {
+                noticeBox.style.background = '#f0fdf4';
+                noticeBox.style.borderColor = '#bbf7d0';
             }
         } else {
-            if (badge) badge.innerHTML = `<span style="color: #ef4444;">Not Logged In</span> — <a href="login.html?redirect=register.html" style="color: #1a73e8; text-decoration: underline;">Sign In First</a>`;
-            if (summaryEmail) summaryEmail.textContent = 'Sign in required';
+            if (badge) badge.innerHTML = `<span style="color: #ef4444; font-weight: 600;">Not Logged In</span> — <a href="login.html?redirect=register.html" style="color: #1a73e8; font-weight: 600; text-decoration: underline;">Sign In First</a>`;
+            if (summaryEmail) summaryEmail.innerHTML = `<span style="color: #ef4444;">Login Required (<a href="login.html?redirect=register.html" style="color: #1a73e8; text-decoration: underline;">Sign In</a>)</span>`;
             if (statusSpan) {
-                statusSpan.textContent = 'Action Required';
-                statusSpan.style.color = '#ef4444';
+                statusSpan.innerHTML = `<span style="color: #ef4444; font-weight: 700; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); padding: 4px 10px; border-radius: 20px;"><i class="fas fa-circle-xmark"></i> Login Required</span>`;
+            }
+            if (noticeBox) {
+                noticeBox.style.background = '#fef2f2';
+                noticeBox.style.borderColor = '#fecaca';
             }
         }
     };
 
+    window.updateCheckoutUserUI = updateUserUI;
+
+    // Check cached auth first for instant UI response
+    const cachedEmail = localStorage.getItem('shoora_logged_in_user_email');
+    if (cachedEmail) {
+        updateUserUI({ email: cachedEmail, displayName: cachedEmail.split('@')[0] });
+    } else {
+        updateUserUI(null);
+    }
+
     // Register onAuthStateChanged listener
     if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged(user => updateUserUI(user));
-    } else if (window.auth && window.auth.onAuthStateChanged) {
-        window.auth.onAuthStateChanged(user => updateUserUI(user));
-    } else {
-        let attempts = 0;
-        const interval = setInterval(() => {
-            attempts++;
-            const u = (window.auth && window.auth.currentUser) || (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser);
-            if (u || attempts > 10) {
-                clearInterval(interval);
-                updateUserUI(u);
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                localStorage.setItem('shoora_logged_in_user_email', user.email);
+            } else {
+                localStorage.removeItem('shoora_logged_in_user_email');
             }
-        }, 300);
+            updateUserUI(user);
+        });
+    } else if (window.auth && window.auth.onAuthStateChanged) {
+        window.auth.onAuthStateChanged(user => {
+            if (user) {
+                localStorage.setItem('shoora_logged_in_user_email', user.email);
+            } else {
+                localStorage.removeItem('shoora_logged_in_user_email');
+            }
+            updateUserUI(user);
+        });
     }
 }
 
