@@ -1483,11 +1483,21 @@
             if (u) {
                 u.status = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
                 
-                // 1. Maintain dedicated shoora_suspended_users registry
+                // 1. Fetch current Cloud Firestore Suspensions List
                 let suspendedList = [];
-                try {
-                    suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
-                } catch(e) {}
+                if (db && doc && getDoc) {
+                    try {
+                        const secSnap = await getDoc(doc(db, "platform_security", "suspensions"));
+                        if (secSnap.exists()) {
+                            suspendedList = (secSnap.data().suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                        }
+                    } catch(e) {}
+                }
+                if (suspendedList.length === 0) {
+                    try {
+                        suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
+                    } catch(e) {}
+                }
 
                 if (u.status === 'SUSPENDED') {
                     if (!suspendedList.includes(cleanEmail)) suspendedList.push(cleanEmail);
