@@ -1035,32 +1035,47 @@
             if (input) input.value = window.generate256CryptoKey();
         };
 
-        // Data Loader (Real Firestore + Cleaned Local Storage)
-        // Real-Time Cloud Listeners Unsubscribers
+        // Data Loader (100% Real-Time Cloud Firestore WebSocket Stream)
         let unsubscribeVault = null;
         let unsubscribeUsers = null;
         let unsubscribeOrders = null;
+        let adminCloudSuspended = [];
+        let adminCloudRevoked = [];
 
         window.loadAllData = async function() {
-            // 1. Fetch Cloud Global Security Policy (Suspensions & Revocations)
-            let cloudSuspended = [];
-            let cloudRevoked = [];
-            if (db && doc && getDoc) {
+            // 1. Live Cloud Global Security Policy Stream (Suspensions & Revocations)
+            if (db && doc && onSnapshot) {
                 try {
-                    const secSnap = await getDoc(doc(db, "platform_security", "suspensions"));
-                    if (secSnap.exists()) {
-                        const secData = secSnap.data();
-                        cloudSuspended = (secData.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
-                        cloudRevoked = (secData.revokedKeys || []).map(k => (k || '').trim());
-                        localStorage.setItem('shoora_suspended_users', JSON.stringify(cloudSuspended));
-                        localStorage.setItem('shoora_revoked_keys', JSON.stringify(cloudRevoked));
-                    }
+                    onSnapshot(doc(db, "platform_security", "suspensions"), (secSnap) => {
+                        if (secSnap.exists()) {
+                            const secData = secSnap.data();
+                            adminCloudSuspended = (secData.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                            adminCloudRevoked = (secData.revokedKeys || []).map(k => (k || '').trim());
+                            
+                            // Re-evaluate users and orders with latest live policy
+                            if (adminData.users.length > 0) {
+                                adminData.users.forEach(u => {
+                                    u.status = adminCloudSuspended.includes((u.email || '').toLowerCase().trim()) ? 'SUSPENDED' : 'ACTIVE';
+                                });
+                                renderAccountsTable();
+                            }
+                            if (adminData.orders.length > 0) {
+                                adminData.orders.forEach(o => {
+                                    if (adminCloudRevoked.includes(o.apiKey)) {
+                                        o.status = 'REVOKED';
+                                    }
+                                });
+                                renderOrdersTable();
+                                renderUserKeysTable();
+                            }
+                        }
+                    });
                 } catch(e) {
-                    console.warn("Security policy fetch notice:", e);
+                    console.warn("Security stream notice:", e);
                 }
             }
 
-            // 2. Real-Time Cloud Inventory Vault Listener
+            // 2. Real-Time Cloud Inventory Vault Live Stream
             if (db && collection && onSnapshot) {
                 if (unsubscribeVault) unsubscribeVault();
                 try {
@@ -1068,23 +1083,22 @@
                         adminData.vault = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                         renderVaultTable();
                         updateMetricsRibbon();
-                    }, (err) => console.warn("Vault sync notice:", err));
+                    }, (err) => console.warn("Vault stream error:", err));
                 } catch(e) {}
             }
 
-            // 3. Real-Time Cloud Registered Users Listener
+            // 3. Real-Time Cloud Registered Users Live Stream
             if (db && collection && onSnapshot) {
                 if (unsubscribeUsers) unsubscribeUsers();
                 try {
                     unsubscribeUsers = onSnapshot(collection(db, "users"), (snap) => {
-                        const suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
                         const userMap = {};
                         
                         snap.docs.forEach(d => {
                             const u = d.data();
                             if (u && u.email) {
                                 const emailLower = u.email.toLowerCase().trim();
-                                const isSusp = (u.status === 'SUSPENDED') || suspendedList.includes(emailLower);
+                                const isSusp = (u.status === 'SUSPENDED') || adminCloudSuspended.includes(emailLower);
                                 userMap[emailLower] = {
                                     uid: d.id,
                                     email: u.email,
@@ -1097,12 +1111,12 @@
                             }
                         });
 
-                        // Calculate user stats from existing orders
+                        // Calculate user statistics from existing orders
                         adminData.orders.forEach(o => {
                             const em = (o.email || o.userEmail || '').toLowerCase().trim();
                             if (em) {
                                 if (!userMap[em]) {
-                                    userMap[em] = { email: em, keysCount: 0, totalSpent: 0, status: suspendedList.includes(em) ? 'SUSPENDED' : 'ACTIVE' };
+                                    userMap[em] = { email: em, keysCount: 0, totalSpent: 0, status: adminCloudSuspended.includes(em) ? 'SUSPENDED' : 'ACTIVE' };
                                 }
                                 userMap[em].keysCount++;
                                 userMap[em].totalSpent += Number(o.amount || o.price || 0);
@@ -1112,20 +1126,19 @@
                         adminData.users = Object.values(userMap);
                         renderAccountsTable();
                         updateMetricsRibbon();
-                    }, (err) => console.warn("Users sync notice:", err));
+                    }, (err) => console.warn("Users stream error:", err));
                 } catch(e) {}
             }
 
-            // 4. Real-Time Cloud Orders & User Keys Listener
+            // 4. Real-Time Cloud Orders & User Keys Live Stream
             if (db && collection && onSnapshot) {
                 if (unsubscribeOrders) unsubscribeOrders();
                 try {
                     unsubscribeOrders = onSnapshot(collection(db, "orders"), (snap) => {
-                        const revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
                         adminData.orders = snap.docs.map(d => {
                             const o = d.data();
                             const orderId = d.id;
-                            const isRevoked = (o.status === 'REVOKED' || o.status === 'revoked') || revokedList.includes(o.apiKey);
+                            const isRevoked = (o.status === 'REVOKED' || o.status === 'revoked') || adminCloudRevoked.includes(o.apiKey);
                             return {
                                 orderId: orderId,
                                 ...o,
@@ -1140,11 +1153,11 @@
                         renderUserKeysTable();
                         renderAccountsTable();
                         updateMetricsRibbon();
-                    }, (err) => console.warn("Orders sync notice:", err));
+                    }, (err) => console.warn("Orders stream error:", err));
                 } catch(e) {}
             }
 
-            // 5. Load Audit Logs from Cloud & Local
+            // 5. Load Audit Logs from Cloud
             try {
                 if (db && collection && getDocs) {
                     const auditSnap = await getDocs(collection(db, "platform_audit"));
@@ -1153,10 +1166,6 @@
                     }
                 }
             } catch(e) {}
-            if (adminData.audit.length === 0) {
-                const savedAudit = localStorage.getItem('shoora_audit_logs');
-                adminData.audit = savedAudit ? JSON.parse(savedAudit) : [];
-            }
 
             renderAllTables();
             updateMetricsRibbon();
@@ -1446,43 +1455,39 @@
         window.toggleUserKeyStatus = async function(apiKey) {
             const k = adminData.userKeys.find(item => item.apiKey === apiKey);
             if (k) {
-                k.status = (k.status === 'REVOKED' || k.status === 'revoked') ? 'ACTIVE' : 'REVOKED';
+                const newStatus = (k.status === 'REVOKED' || k.status === 'revoked') ? 'ACTIVE' : 'REVOKED';
+                k.status = newStatus;
                 
-                // 1. Maintain dedicated shoora_revoked_keys list
-                let revokedList = [];
-                try {
-                    revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
-                } catch(e) {}
-
-                if (k.status === 'REVOKED') {
-                    if (!revokedList.includes(apiKey)) revokedList.push(apiKey);
+                // Maintain in-memory active list
+                if (newStatus === 'REVOKED') {
+                    if (!adminCloudRevoked.includes(apiKey)) adminCloudRevoked.push(apiKey);
                 } else {
-                    revokedList = revokedList.filter(x => x !== apiKey);
+                    adminCloudRevoked = adminCloudRevoked.filter(x => x !== apiKey);
                 }
-                localStorage.setItem('shoora_revoked_keys', JSON.stringify(revokedList));
 
-                // 2. Cloud Firestore Real-Time Global Synchronization
+                // Cloud Firestore Real-Time Global Synchronization
                 if (db && doc && setDoc) {
                     try {
                         await setDoc(doc(db, "platform_security", "suspensions"), {
-                            revokedKeys: revokedList,
+                            revokedKeys: adminCloudRevoked,
                             updatedAt: new Date().toISOString()
                         }, { merge: true });
                     } catch(e) {}
 
                     try {
                         if (k.orderId) {
-                            await setDoc(doc(db, "orders", k.orderId), { status: k.status }, { merge: true });
+                            await setDoc(doc(db, "orders", k.orderId), { status: newStatus }, { merge: true });
                         }
                         if (k.uid && (k.keyId || k.id)) {
-                            await setDoc(doc(db, "users", k.uid, "keys", (k.keyId || k.id)), { status: k.status }, { merge: true });
+                            await setDoc(doc(db, "users", k.uid, "keys", (k.keyId || k.id)), { status: newStatus }, { merge: true });
                         }
                     } catch(e) {}
                 }
 
                 renderUserKeysTable();
-                logAuditEvent('USER_KEY_TOGGLE', `Toggled user key ${apiKey} to ${k.status}`);
-                showSecToast(`Customer Key status set to ${k.status} (Cloud Policy Updated)`);
+                renderOrdersTable();
+                logAuditEvent('USER_KEY_TOGGLE', `Toggled user key ${apiKey} to ${newStatus}`);
+                showSecToast(`Customer Key status set to ${newStatus} (Cloud Updated)`);
             }
         };
 
@@ -1490,26 +1495,21 @@
             const cleanEmail = (email || '').toLowerCase().trim();
             const u = adminData.users.find(item => item.email.toLowerCase() === cleanEmail);
             if (u) {
-                u.status = u.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+                const newStatus = (u.status === 'ACTIVE') ? 'SUSPENDED' : 'ACTIVE';
+                u.status = newStatus;
                 
-                // 1. Maintain dedicated shoora_suspended_users registry
-                let suspendedList = [];
-                try {
-                    suspendedList = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
-                } catch(e) {}
-
-                if (u.status === 'SUSPENDED') {
-                    if (!suspendedList.includes(cleanEmail)) suspendedList.push(cleanEmail);
+                // Maintain in-memory active list
+                if (newStatus === 'SUSPENDED') {
+                    if (!adminCloudSuspended.includes(cleanEmail)) adminCloudSuspended.push(cleanEmail);
                 } else {
-                    suspendedList = suspendedList.filter(x => x !== cleanEmail);
+                    adminCloudSuspended = adminCloudSuspended.filter(x => x !== cleanEmail);
                 }
-                localStorage.setItem('shoora_suspended_users', JSON.stringify(suspendedList));
 
-                // 2. Cloud Firestore Real-Time Global Synchronization
+                // Cloud Firestore Real-Time Global Synchronization
                 if (db && doc && setDoc) {
                     try {
                         await setDoc(doc(db, "platform_security", "suspensions"), {
-                            suspendedEmails: suspendedList,
+                            suspendedEmails: adminCloudSuspended,
                             updatedAt: new Date().toISOString()
                         }, { merge: true });
                     } catch(err) {
@@ -1518,17 +1518,14 @@
 
                     if (u.uid) {
                         try {
-                            await setDoc(doc(db, "users", u.uid), { status: u.status }, { merge: true });
+                            await setDoc(doc(db, "users", u.uid), { status: newStatus }, { merge: true });
                         } catch(e) {}
                     }
                 }
 
-                // 3. Save user status in accounts cache
-                localStorage.setItem('shoora_admin_users', JSON.stringify(adminData.users));
-
                 renderAccountsTable();
-                logAuditEvent('USER_ACCOUNT_TOGGLE', `Customer ${cleanEmail} status set to ${u.status}`);
-                showSecToast(`User account set to ${u.status} (Cloud Policy Updated)`);
+                logAuditEvent('USER_ACCOUNT_TOGGLE', `Customer ${cleanEmail} status set to ${newStatus}`);
+                showSecToast(`User account set to ${newStatus} (Cloud Database Updated)`);
             }
         };
 

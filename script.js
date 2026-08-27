@@ -87,11 +87,10 @@ function initCloudVaultListener() {
         try {
             window.onSnapshot(window.collection(window.db, "inventory_vault"), (snap) => {
                 cloudVaultCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                localStorage.setItem('shoora_admin_vault', JSON.stringify(cloudVaultCache));
                 if (typeof updateDynamicRegistrationPrice === 'function') {
                     updateDynamicRegistrationPrice();
                 }
-            }, (err) => console.warn("Cloud vault sync:", err));
+            }, (err) => console.warn("Cloud vault sync error:", err));
         } catch(e) {}
     }
 }
@@ -99,13 +98,7 @@ document.addEventListener('DOMContentLoaded', initCloudVaultListener);
 if (typeof window !== 'undefined' && window.db) initCloudVaultListener();
 
 function getVaultInventoryList() {
-    if (cloudVaultCache && cloudVaultCache.length > 0) return cloudVaultCache;
-    const raw = localStorage.getItem('shoora_admin_vault');
-    try {
-        return raw ? JSON.parse(raw) : [];
-    } catch(e) {
-        return [];
-    }
+    return cloudVaultCache || [];
 }
 window.getVaultInventoryList = getVaultInventoryList;
 
@@ -430,40 +423,7 @@ function initRegistrationWizardV6() {
                 }
             }
 
-            // 6. Save in LocalStorage Caches
-            localStorage.setItem('shoora_last_transaction', JSON.stringify(transactionRecord));
-
-            try {
-                const allOrders = JSON.parse(localStorage.getItem('shoora_all_orders') || '[]');
-                allOrders.unshift(transactionRecord);
-                localStorage.setItem('shoora_all_orders', JSON.stringify(allOrders));
-            } catch(e) {}
-
-            try {
-                const allPurchased = JSON.parse(localStorage.getItem('shoora_all_purchased_keys') || '[]');
-                allPurchased.unshift(transactionRecord);
-                localStorage.setItem('shoora_all_purchased_keys', JSON.stringify(allPurchased));
-            } catch(e) {}
-
-            if (currentUser && currentUser.uid) {
-                try {
-                    const uKey = 'shoora_user_keys_' + currentUser.uid;
-                    const uList = JSON.parse(localStorage.getItem(uKey) || '[]');
-                    uList.unshift(transactionRecord);
-                    localStorage.setItem(uKey, JSON.stringify(uList));
-                } catch (e) {}
-            }
-
-            if (userEmail) {
-                try {
-                    const eKey = 'shoora_user_keys_' + userEmail.toLowerCase();
-                    const eList = JSON.parse(localStorage.getItem(eKey) || '[]');
-                    eList.unshift(transactionRecord);
-                    localStorage.setItem(eKey, JSON.stringify(eList));
-                } catch (e) {}
-            }
-
-            // 7. Instant Success Modal Display
+            // 6. Instant Success Modal Display
             const displayEl = document.getElementById('apiKeyDisplay');
             if (displayEl) {
                 const masked = (apiKey.length <= 12) ? 'sk_live_••••••••' : (apiKey.substring(0, 8) + '••••••••••••••••' + apiKey.substring(apiKey.length - 4));

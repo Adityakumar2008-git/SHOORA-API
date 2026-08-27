@@ -769,6 +769,9 @@
 
         let globalUserKeys = [];
         let currentActiveFilter = 'all';
+        let dashboardRevokedSet = new Set();
+        let unsubscribeDashboardKeys = null;
+        let unsubscribeDashboardSec = null;
 
         function initDashboardAuth() {
             let authResolved = false;
@@ -777,34 +780,28 @@
                 if (authResolved && !user) return;
                 authResolved = true;
 
-                // Suspension Guard
-                let suspendedUsers = [];
-                try {
-                    suspendedUsers = JSON.parse(localStorage.getItem('shoora_suspended_users') || '[]');
-                } catch(e) {}
-
-                const userEmail = (user && user.email) ? user.email.toLowerCase() : (localStorage.getItem('shoora_logged_in_user_email') || '').toLowerCase();
-
-                if (userEmail && suspendedUsers.includes(userEmail)) {
-                    console.warn("User account is SUSPENDED. Evicting session.");
-                    localStorage.removeItem('shoora_logged_in_user_email');
-                    if (typeof firebase !== 'undefined' && firebase.auth) {
-                        try { await firebase.auth().signOut(); } catch(e) {}
-                    }
-                    if (window.auth && window.auth.signOut) {
-                        try { await window.auth.signOut(); } catch(e) {}
-                    }
-                    window.location.href = 'login.html?suspended=true';
+                if (!user) {
+                    window.location.href = 'login.html?redirect=dashboard.html';
                     return;
                 }
 
-                if (!user) {
-                    // Check if local transaction exists before redirecting
-                    const hasLocalTx = localStorage.getItem('shoora_last_transaction') || localStorage.getItem('shoora_all_purchased_keys');
-                    if (!hasLocalTx) {
-                        window.location.href = 'login.html?redirect=dashboard.html';
-                        return;
-                    }
+                // Real-Time Direct Cloud Suspension Check
+                if (window.db && window.doc && window.getDoc) {
+                    try {
+                        const secSnap = await window.getDoc(window.doc(window.db, "platform_security", "suspensions"));
+                        if (secSnap.exists()) {
+                            const data = secSnap.data();
+                            const suspendedList = (data.suspendedEmails || []).map(e => (e || '').toLowerCase().trim());
+                            if (user.email && suspendedList.includes(user.email.toLowerCase().trim())) {
+                                console.warn("User account is SUSPENDED (Cloud Live Check). Evicting session.");
+                                if (window.auth && window.auth.signOut) {
+                                    try { await window.auth.signOut(); } catch(e) {}
+                                }
+                                window.location.href = 'login.html?suspended=true';
+                                return;
+                            }
+                        }
+                    } catch(e) {}
                 }
 
                 const displayName = user ? (user.displayName || (user.email ? user.email.split('@')[0] : 'Developer')) : 'Developer';
@@ -812,6 +809,8 @@
                 if (welcomeEl) {
                     welcomeEl.textContent = `Welcome back, ${displayName}`;
                 }
+
+                initDashboardRevocationStream();
                 await loadDashboardData(user);
             };
 
@@ -836,24 +835,36 @@
             initDashboardAuth();
         });
 
-        let unsubscribeDashboardKeys = null;
-        let unsubscribeDashboardOrders = null;
+        function initDashboardRevocationStream() {
+            if (window.db && window.doc && window.onSnapshot && !unsubscribeDashboardSec) {
+                try {
+                    unsubscribeDashboardSec = window.onSnapshot(window.doc(window.db, "platform_security", "suspensions"), (snap) => {
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            const revoked = data.revokedKeys || [];
+                            dashboardRevokedSet = new Set(revoked);
+                            if (globalUserKeys.length > 0) {
+                                renderSynchronizedDashboardKeys(globalUserKeys, window.auth ? window.auth.currentUser : null);
+                            }
+                        }
+                    }, (err) => console.warn("Dashboard revocation stream error:", err));
+                } catch(e) {}
+            }
+        }
 
         async function loadDashboardData(user) {
             const grid = document.getElementById('userKeysGrid');
             const receiptsTable = document.getElementById('userReceiptsTable');
             let keysList = [];
 
-            // 1. Real-Time Cloud Firestore Sync for User's Owned Keys
+            // 1. Real-Time Cloud Firestore Sync for User's Owned Keys Live Stream
             if (user && user.uid && window.db && window.collection && window.onSnapshot) {
                 if (unsubscribeDashboardKeys) unsubscribeDashboardKeys();
                 try {
                     unsubscribeDashboardKeys = window.onSnapshot(window.collection(window.db, "users", user.uid, "keys"), (snap) => {
                         const cloudKeys = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        if (cloudKeys.length > 0) {
-                            renderSynchronizedDashboardKeys(cloudKeys, user);
-                        }
-                    }, (err) => console.warn("Keys onSnapshot notice:", err));
+                        renderSynchronizedDashboardKeys(cloudKeys, user);
+                    }, (err) => console.warn("Keys onSnapshot stream notice:", err));
                 } catch(e) {}
             }
 
@@ -888,14 +899,6 @@
                 } catch (e) {}
             }
 
-            // 4. Legacy local cache fallback (if offline or new sync)
-            if (keysList.length === 0 && user && user.email) {
-                try {
-                    const emailKeys = JSON.parse(localStorage.getItem('shoora_user_keys_' + user.email.toLowerCase()) || '[]');
-                    emailKeys.forEach(k => { if (k && k.apiKey && !keysList.some(x => x.apiKey === k.apiKey)) keysList.push(k); });
-                } catch(e) {}
-            }
-
             renderSynchronizedDashboardKeys(keysList, user);
         }
 
@@ -915,14 +918,9 @@
             });
             keysList = Array.from(uniqueMap.values());
 
-            // 7. Master Real-Time Revocation Synchronization
-            let revokedList = [];
-            try {
-                revokedList = JSON.parse(localStorage.getItem('shoora_revoked_keys') || '[]');
-            } catch(e) {}
-
+            // Master Real-Time Revocation Synchronization
             keysList.forEach(k => {
-                if (revokedList.includes(k.apiKey) || (k.status && k.status.toUpperCase() === 'REVOKED')) {
+                if (dashboardRevokedSet.has(k.apiKey) || (k.status && k.status.toUpperCase() === 'REVOKED')) {
                     k.status = 'REVOKED';
                 }
             });
